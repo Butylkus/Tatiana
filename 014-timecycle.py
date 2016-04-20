@@ -8,11 +8,18 @@ import os
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) #Почему-то только в этом режиме
 
-sw2 = 18
 
-GPIO.setup(sw2, GPIO.OUT)
-GPIO.output(sw2, 1)
+#для моей схемы подключения модуля из 4 реле. Пример работы распиновки: http://www.youtube.com/watch?v=Ln2owTgYv9M&index=4&list=PLTejl8qzLUsQuvwGsrdSC7KPgWu7mahWn
+GPIO.setup(17, GPIO.OUT)
+GPIO.setup(18, GPIO.OUT)
+GPIO.setup(22, GPIO.OUT)
+GPIO.setup(27, GPIO.OUT)
+GPIO.output(17, 1)
+GPIO.output(18, 1)
+GPIO.output(22, 1)
+GPIO.output(27, 1)
 
+#Считывает план и возвращает список. Вызывается по ходу выполнения в контексте "по ЭТОМУ плану" для функций device_off и device_on
 def planreader(plan):
     list = []
     f = open(plan, "r")
@@ -21,24 +28,61 @@ def planreader(plan):
     f.close()
     return list
 
-print (planreader("ONplan.txt"))
-print (planreader("OFFplan.txt"))
+#print (planreader("ONplan.txt")) #debug
+#print (planreader("OFFplan.txt")) #debug
+
+#print("Текущее время: ", datetime.strftime(datetime.now(), "%H:%M:%S")) #контроль времени
+
+#Функция вЫключения. Принимает пин, план и логфайл
+#Пин указывать номером согласно базовой схеме подключения. Если указать не тот, то неверное устройство будет работать по неверному плану.
+#Логфайл лучше всего именовать по имени девайса, например, LampaLog.txt.
+#В будущем лучше сделать единый лог без параметра функции, но уже сейчас можно писать в один файл, просто указав его для всех вызовов
+def device_off(pin, offplan, logfile):
+    for moment in planreader(offplan): #Дадада, я псих, рекурсия в наличии. Вызывает считыватель плана ещё раз на всякий пожарный
+        if moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
+            GPIO.output(pin,1)
+            print("Выключено в ", moment) #при ручном запуске лучше раскомментировать, чтобы не смотреть в логи
+            #Пишем в лог
+            f = open(logfile, "a")
+            f.write("Устроство на пине " + pin + " выключено в " + datetime.strftime(datetime.now(), "%H:%M:%S") + "\n")
+            f.close()
+    
+#Функция Включения. Принимает пин, план и логфайл
+#полностью аналогична предыдущей, только включает, а не выключает.
+def device_on(pin, onplan, logfile):
+    for moment in planreader(onplan): #Дадада, я псих, рекурсия в наличии. Вызывает считыватель плана ещё раз на всякий пожарный
+        if moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
+            GPIO.output(pin,0)
+            print("Включено в ", moment) #при ручном запуске лучше раскомментировать, чтобы не смотреть в логи
+            #Пишем в лог
+            f = open(logfile, "a")
+            f.write("Устроство на пине " + str(pin) + " включено в " + str(datetime.strftime(datetime.now(), "%H:%M:%S")) + "\n")
+            f.close()
+
 
 
 while True:
+    time.sleep(0.1) #Слегка снижает нагрузку на процессор, сокращая активность до 9-10 проходов в секунду
+    
+    #----БЛОК РАЗМНОЖИТЬ ДЛЯ КАЖДОГО НУЖНОГО УСТРОЙСТВА---
+    #Смотрим указанный план и вызываем функцию включения и выключения
+    #План для КАЖДОГО устройства должен существовать!
+    #Включение
     for moment in planreader("ONplan.txt"):
-        if moment == datetime.strftime(datetime.now(), "%M:%S"):
-            GPIO.output(sw2,0)
-            print("Включено в ", moment)
-            while moment == datetime.strftime(datetime.now(), "%M:%S"):
+        if moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
+            #Вызываем функцию включения
+            device_on(18, "ONplan.txt", "commonlog.txt")
+            #Подавляет актвность блока после первой отработки в эту же секунду, иначе загадит лог очередным вызовом функции. На всякий случай лучше не использовать одно и то же время для всех устройств, мало ли что...
+            while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
                 continue
-    print("Текущее время: ", datetime.strftime(datetime.now(), "%H:%M:%S"))
-
+    #Выключение
     for moment in planreader("OFFplan.txt"):
-        if moment == datetime.strftime(datetime.now(), "%M:%S"):
-            GPIO.output(sw2,1)
-            print("Выключено в ", moment)
-            while moment == datetime.strftime(datetime.now(), "%M:%S"):
+        if moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
+            #Вызываем функцию включения
+            device_off(18, "OFFplan.txt", "commonlog.txt")
+            #Подавляет актвность блока после первой отработки в эту же секунду, иначе загадит лог очередным вызовом функции. На всякий случай лучше не использовать одно и то же время для всех устройств, мало ли что...
+            while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
                 continue
+    #----Конец размножаемого блока---
 
 
