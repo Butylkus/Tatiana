@@ -48,7 +48,7 @@ def device_off(pin, offplan, logfile="commonlog.txt"):
             print("Выключено в ", moment) #при ручном запуске лучше раскомментировать, чтобы не смотреть в логи
             #Пишем в лог
             f = open(logfile, "a")
-            f.write("Устройство на пине " + str(pin) + " выключено в " + str(datetime.strftime(datetime.now(), "%H:%M:%S")) + "\n")
+            f.write("Устройство на пине " + str(pin) + " выключено " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
             f.close()
     
 #Функция Включения. Принимает пин, план и логфайл
@@ -60,7 +60,7 @@ def device_on(pin, onplan, logfile="commonlog.txt"):
             print("Включено в ", moment) #при ручном запуске лучше раскомментировать, чтобы не смотреть в логи
             #Пишем в лог
             f = open(logfile, "a")
-            f.write("Устройство на пине " + str(pin) + " включено в " + str(datetime.strftime(datetime.now(), "%H:%M:%S")) + "\n")
+            f.write("Устройство на пине " + str(pin) + " включено " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
             f.close()
 
 
