@@ -44,7 +44,7 @@ def device_off(pin, offplan, logfile):
             print("Выключено в ", moment) #при ручном запуске лучше раскомментировать, чтобы не смотреть в логи
             #Пишем в лог
             f = open(logfile, "a")
-            f.write("Устроство на пине " + pin + " выключено в " + datetime.strftime(datetime.now(), "%H:%M:%S") + "\n")
+            f.write("Устроство на пине " + str(pin) + " выключено в " + str(datetime.strftime(datetime.now(), "%H:%M:%S")) + "\n")
             f.close()
     
 #Функция Включения. Принимает пин, план и логфайл
