@@ -1,5 +1,5 @@
 # BuRasPi
-RUSSIAN LANGUAGE ONLY! Sorry, but if you want to understand what's goint on, use any online translator.
+RUSSIAN LANGUAGE ONLY! Sorry, but if you want to understand what's going on, use any online translator.
 
 
 Дисклеймер
