@@ -79,7 +79,7 @@ def device(pin):
     GPIO.output(pin,int(f.read()))
     f.close()
 
-
+#def button(pin-in, pin-out):
 
 while True:
     time.sleep(0.1) #Слегка снижает нагрузку на процессор, сокращая активность до 9-10 проходов в секунду
