@@ -1,7 +1,18 @@
 #!/usr/bin/python3.4
 #coding=utf-8
+#
+#
+#
+# НАСТРОЙКА ПОД СЕБЯ:
+# 1. Убедитесь, что существуют и имеют соответствующие права каталоги по умлочанию. Или пропишите свой дефолтный путь (в блоке НАСТРОЙКИ: default_path)
+# 2. Пропишите все используемые вами порты GPIO на ввод и вывод 
+# 3. Дублируйте нужные функции в блоке ГЛАВНЫЙ ЦИКЛ с нужными вам параметрами (какая кнопка какое устройство включает, по какому плану должны работать определённые устройства)
+# 4. Автозапуск описан в README
+# 5*. Желательно также заранее создать просто пустые статус-файлы по пути %default_path%/status/XX, где ХХ номера используемых пинов вывода. Можно создать просто подряд с 1 по 27.
+#
 
-version = "0.5b" #ААААЛЬФАААААААААА!!!!!!!!!!!!!!!
+
+version = "0.5.1b" 
 
 import time
 from datetime import datetime
@@ -10,29 +21,28 @@ import os, sys
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) #Почему-то только в этом режиме
 
+# ------------- НАСТРОЙКИ ----------------
+
 #ВЫХОДНЫЕ контакты (управление реле)
 #для моей схемы подключения модуля из 4 реле. Пример работы распиновки: http://www.youtube.com/watch?v=Ln2owTgYv9M&index=4&list=PLTejl8qzLUsQuvwGsrdSC7KPgWu7mahWn
 GPIO.setup(17, GPIO.OUT)
 GPIO.setup(18, GPIO.OUT)
-GPIO.setup(22, GPIO.OUT)
 GPIO.setup(27, GPIO.OUT)
 GPIO.output(17, 1)
 GPIO.output(18, 1)
-GPIO.output(22, 1)
 GPIO.output(27, 1)
 
 #ВХОДНЫЕ контакты (кнопки-выключатели)
 GPIO.setup(21, GPIO.IN) #тестовая кнопка
 
-#Базовый путь к статусам:
+#Базовый путь к статусам и планам. СОЗДАТЬ РУКАМИ при первом запуске! Добавить подкаталоги status и plans, дать права 777 рекурсивно.
 default_path = "/home/pi/.tatiana/"
 
-f = open(default_path + "commonlog.txt", "a")
-f.write("Татьяна проснулась: " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
-f.close()
+
+# ------------- ФУНКЦИИ ----------------
 
 
-#Считывает план и возвращает список. Вызывается по ходу выполнения в контексте "по ЭТОМУ плану" для функций plan_on/off()
+#Считывает план и возвращает список. Вызывается по ходу выполнения в контексте "по ЭТОМУ плану" для функции plan_switch()
 def planreader(plan):
     list = []
     f = open(plan, "r")
@@ -40,9 +50,6 @@ def planreader(plan):
     list = line.split("\n")
     f.close()
     return list
-
-#print (planreader("ONplan.txt")) #debug
-#print("Текущее время: ", datetime.strftime(datetime.now(), "%H:%M:%S")) #контроль времени
 
 
 #Функция включения выключения по планам.
@@ -86,7 +93,6 @@ def plan_switch(pin_out, onplan, offplan, logfile=default_path + "commonlog.txt"
             while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
                 continue
     device(pin_out,logfile)
-
 
 
 #Главная функция. Включает и отключает согласно статусу из соответствующего пину файла
@@ -139,21 +145,27 @@ def button(pin_in, pin_out, logfile=default_path + "commonlog.txt"):
         while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
             continue
 
+# ------------- ИСПОЛНЕНИЕ ----------------
+
+f = open(default_path + "commonlog.txt", "a")
+f.write("Татьяна проснулась: " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+f.close()
 
 # ------------- ГЛАВНЫЙ ЦИКЛ ----------------
 
 while True:
     time.sleep(0.1) #Слегка снижает нагрузку на процессор, сокращая активность до 9-10 проходов в секунду
     
-    
-    
+    #всё наглядно: устройства на пине 18 включается по 18onplan.txt, выключается по 18offplan.txt, а сообщения выводит в общий лог.
+    #Для каждого нового устройства просто продублируйте вызов функции с новыми параметрами
     plan_switch(18, default_path + "plans/18onplan.txt", default_path + "plans/18offplan.txt", logfile=default_path + "commonlog.txt")
-    plan_switch(17, default_path + "plans/17onplan.txt", default_path + "plans/17offplan.txt", logfile=default_path + "commonlog.txt")
+    
+    #Для каждого нового устройства просто продублируйте вызов функции с новыми параметрами
     button(21, 27, default_path + "commonlog.txt") #По сигналу 21 пина управляется устройство на 27
 
 
-# -------------  /////// ГЛАВНЫЙ ЦИКЛ ----------------
 
+# ------------- ВЫХОД ----------------
 
 #Прибираемся при перезагрузке/рестарте
 GPIO.cleanup() 
