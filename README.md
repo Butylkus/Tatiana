@@ -4,5 +4,7 @@ RUSSIAN LANGUAGE ONLY! Sorry, but if you want to understand what's going on, use
 Структура репозитория
 ----
 [tatiana](https://github.com/Butylkus/BuRasPi/tree/master/tatiana) - Основная программа, инструкция.
-.tatiana - Пример структуры рабочих файлов (планы, статусы). Для путей по умолчанию!
+
+[.tatiana](https://github.com/Butylkus/BuRasPi/tree/master/.tatiana) - Пример структуры рабочих файлов (планы, статусы). Для путей по умолчанию!
+
 [История версий](https://github.com/Butylkus/BuRasPi/blob/master/tatiana/CHANGELOG.txt) - там же CHANGELOG.txt
