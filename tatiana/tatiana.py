@@ -12,7 +12,7 @@
 #
 
 
-version = "0.5.1b" 
+version = "0.6b" 
 
 import time
 from datetime import datetime
