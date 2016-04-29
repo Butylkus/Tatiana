@@ -96,9 +96,18 @@ def plan(planfile=default_path + "plans/plan.txt", statusfile=default_path + "st
 def device(pin):
     f_reader = default_path + "status/"+str(pin) #Цепляем правильный файл
     f = open(f_reader,"r") #читаем статус-файл пина
-    status = int(f.read())
-    GPIO.output(pin, status) #Выключаем/выключаем устройство
-    f.close()
+    try: 
+        status = int(f.read())
+    except ValueError:
+        f.close()
+        time.sleep(0.05)
+        f = open(f_reader,"r")
+        status = int(f.read())
+        GPIO.output(pin, status) #Выключаем/выключаем устройство
+    else:
+        GPIO.output(pin, status) #Выключаем/выключаем устройство
+    finally:
+        f.close()
 
 
 #Детектор кнопок
