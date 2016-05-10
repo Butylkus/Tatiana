@@ -1,0 +1,234 @@
+@charset "utf-8";
+#main
+{
+    margin: 0 auto;
+    text-align: left;
+    margin-top: 1%;
+    padding: 10px 10px 10px 10px;
+    color: #000;
+    font-size: 60px;
+    width: 720px;
+
+}
+#reload_buttons
+{   
+    height: 128px;
+	width: 128px;
+	cursor: pointer;
+	background: url('../img/update.png');
+        font: 30px/1 monospace;
+}
+.action
+{
+    width: 200px;
+    border-radius: 14px;
+    font: 20px/1 monospace;
+    
+}
+
+
+
+
+
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html, body {
+  height: 100%;
+}
+body {
+  font: 14px/1 monospace;
+  color: #555;
+  background: #fafafa;
+}
+table {
+  font: 36px/1 monospace;
+  color: #555;
+  border-collapse: collapse;
+  border-color: black;
+  width: 860px;
+}
+th{
+  text-align: center;
+  vertical-align: middle;
+  text-align: center;
+  background-color: rgba(0, 219, 255, 0.1);
+}
+td.onplan{
+  background-color: rgba(9, 195, 0, 0.1);
+  text-align: center;
+  vertical-align: middle;
+}
+td.offplan{
+  background-color: rgba(251, 67, 67, 0.1);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.logpicture{
+    vertical-align: middle;
+}
+
+
+.logtab{
+    font:40px/1 monospace;
+}
+
+/*стили фиксированного меню*/
+.top-nav {
+    background: #555555;
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.4);
+    left: 0;
+    opacity: 0.95;
+    padding: 8px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 9999;
+}
+.topnav-wrapper {
+    margin: 0 auto;
+    max-width: 980px;
+}
+.top-logo {
+    color: #ddd;
+    font: bold 16px/20px "Crete Round",serif;
+    padding-left: 10px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+.top-logo a{
+color: #B8B8B8;
+text-decoration: none;    
+}
+.top-logo a:hover{
+color: #ddd;
+}
+.topnav-right {
+    float: right;
+}
+.right-menu {
+    margin: 0;
+    overflow: hidden;
+}
+.right-menu  li {
+    float: left;
+    list-style-type: none;
+    margin: 0;
+}
+.right-menu li a {
+    color: #B8B8B8;
+    display: block;
+    padding: 0.05em 0.75em;
+    text-decoration: none;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+.right-menu li a:hover {
+    color: #fff;
+    text-shadow: none;
+}
+.right-menu li span {
+font-size: 16px;
+line-height: 1.2;
+}
+    
+#container {
+max-width: 980px;
+margin: 0 auto;
+padding: 25px 10px 0;
+}
+h1 {
+  padding: 50px 0;
+  font-weight: 400;
+  text-align: center;
+}
+p {
+  margin: 0 0 5px;
+  line-height: 1.5;
+}
+.info{
+  color:rgba(78, 78, 78, 0.8);
+  width:100%;
+  margin: 40px auto;
+  text-align: center;
+  font-weight:300;
+}
+.info a {
+    color: #bbb;
+    text-decoration:none;
+}
+.info a:hover {
+    color: #888;
+}
+
+    
+/* Базовый контейнер табов */
+.tabs {
+  min-width: 320px;
+  max-width: 900px;
+  padding: 0px;
+  margin: 0 auto;
+  
+}
+/* Стили секций с содержанием */
+section {
+  display: none;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+.tabs input {
+  display: none;
+}
+/* Стили вкладок (табов) */
+.tabs label {
+  display: inline-block;
+  margin: 0 0 -1px;
+  padding: 15px 25px;
+  font-weight: 600;
+  text-align: center;
+  color: #aaa;
+  border: 1px solid #ddd;
+  background: #f1f1f1;
+  border-radius: 3px 3px 0 0;
+}
+
+/* изменения стиля заголовков вкладок при наведении */
+.tabs label:hover {
+  color: #888;
+  cursor: pointer;
+}
+/* стили для активной вкладки */
+.tabs input:checked + label {
+  color: #555;
+  border: 1px solid #ddd;
+  border-top: 1px solid #009933;
+  border-bottom: 1px solid #fff;
+  background: #fff;
+}
+/* активация секций с помощью переключателя :checked */
+#tab1:checked ~ #content1,
+#tab2:checked ~ #content2,
+#tab3:checked ~ #content3,
+#tab4:checked ~ #content4 {
+  display: block;
+}
+/* медиа запросы для различных типов носителей */  
+@media screen and (max-width: 680px) {
+  .tabs label {
+    font-size: 0;
+  }
+
+  .tabs label:before {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+@media screen and (max-width: 400px) {
+  .tabs label {
+    padding: 15px;
+  }
+}    
+
+    
