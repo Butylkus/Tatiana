@@ -12,7 +12,7 @@
 #
 
 
-version = "0.6b" 
+version = "0.6.1b" 
 
 import time
 from datetime import datetime
@@ -24,21 +24,34 @@ GPIO.setmode(GPIO.BCM) #Почему-то только в этом режиме
 # ------------- НАСТРОЙКИ ----------------
 
 #ВЫХОДНЫЕ контакты (управление реле)
-#для моей схемы подключения модуля из 4 реле. Пример работы распиновки: http://www.youtube.com/watch?v=Ln2owTgYv9M&index=4&list=PLTejl8qzLUsQuvwGsrdSC7KPgWu7mahWn
+#для моей схемы подключения модуля из 8 реле и 1 диода.
+GPIO.setup(2, GPIO.OUT)
+GPIO.setup(3, GPIO.OUT)
+GPIO.setup(4, GPIO.OUT)
+GPIO.setup(14, GPIO.OUT)
+GPIO.setup(15, GPIO.OUT)
 GPIO.setup(17, GPIO.OUT)
 GPIO.setup(18, GPIO.OUT)
 GPIO.setup(27, GPIO.OUT)
 GPIO.setup(22, GPIO.OUT)
+
+
+GPIO.output(2, 1)
+GPIO.output(3, 1)
+GPIO.output(4, 1)
+GPIO.output(14, 1)
 GPIO.output(17, 1)
 GPIO.output(18, 1)
-GPIO.output(27, 1)
+GPIO.output(15, 1)
 GPIO.output(22, 1)
+GPIO.output(27, 1)
+
 
 #ВХОДНЫЕ контакты (кнопки-выключатели)
-GPIO.setup(21, GPIO.IN) #тестовая кнопка
+GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP) #Строго подтяжка! Все кнопки В ЗЕМЛЮ. В случае желания переписать на стяжку, изменить условие функции button() на True
 
 #Базовый путь к статусам и планам. СОЗДАТЬ РУКАМИ при первом запуске! Добавить подкаталоги status и plans, дать права 777 рекурсивно.
-default_path = "/home/pi/.tatiana/"
+default_path = "/home/pi/tatiana/"
 
 
 # ------------- ФУНКЦИИ ----------------
@@ -55,7 +68,7 @@ def plan(planfile=default_path + "plans/plan.txt", statusfile=default_path + "st
     planfile = open(planfile, "r")
     #print("Дескриптор:\n", planfile, "\n\n") #дебаг при ручном запуске
     fullplan = planfile.read()
-    #print("Содержимое плана: \n", fullplan, "\n\n") #дебаг при ручном запуске
+    #print("Содержимое плана:\n", fullplan, "\n\n") #дебаг при ручном запуске
     planstrings = fullplan.split("\n")
     #print("Построчно:\n", planstrings, "\n\n") #дебаг при ручном запуске
     index = len(planstrings)
@@ -124,27 +137,29 @@ def button(pin_in, pin_out, logfile=default_path + "commonlog.txt"):
             f.close()
         except FileNotFoundError:
             f = open(path, "w")
-            status = f.write("0")
+            status = f.write("1")
             f.close()
             status="0"
-        else:
-            f = open(path, "r")
-            status = f.read()
-            f.close()
-        #print (status) #Дебаг, отлов нажатия
-        f = open(path, "w")
-        lfile = open(logfile, "a")
-        if status == "0":
-            f.write("1")
-            lfile.write("%BUTTONOFF% " + str(pin_in) + " > " + str(pin_out) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
-        if status == "1":
-            f.write("0")
-            lfile.write("%BUTTONON% " + str(pin_in) + " > " + str(pin_out) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
-        lfile.close()
+        finally:
+            f = open(path, "w")
+            lfile = open(logfile, "a")
+#            print (status) #Дебаг, отлов нажатия
+            if status == "0":
+                f.write("1")
+#                print ("теперь 1")
+                lfile.write("%BUTTONOFF% " + str(pin_in) + " > " + str(pin_out) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
+#                print ("записано")
+            if status == "1":
+                f.write("0")
+#                print ("теперь 0") #Дебаг, отлов нажатия
+                lfile.write("%BUTTONON% " + str(pin_in) + " > " + str(pin_out) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
+#                print ("записано")
         f.close()
+        lfile.close()
+        os.system("sync")
         device(pin_out)
-        moment = datetime.strftime(datetime.now(), "%H:%M:%S")
-        while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
+        moment = datetime.strftime(datetime.now(), "%H%M%S")
+        while moment == datetime.strftime(datetime.now(), "%H%M%S"):
             continue
 
 
@@ -167,22 +182,26 @@ f.close()
 # ------------- ГЛАВНЫЙ ЦИКЛ ----------------
 
 while True:
-    time.sleep(0.1) #Слегка снижает нагрузку на процессор, сокращая активность до 9-10 проходов в секунду
+    time.sleep(0.11) #Слегка снижает нагрузку на процессор, сокращая активность до 9-10 проходов в секунду
     
     #Проверяем файл плана и если время для какой-либо операции пришло, функция выполнит нужную операцию
     plan()
     
     #Привязываем кнопку к устройству. Одна кнопка может управлять любыми устройствами. И наоборот, любое устройство может управляться любой кнопкой.
     #КАЖДАЯ кнопка должна быть привязана к устройству, для этого просто дублируем функцию с нужными параметрами
-    button(21, 27, default_path + "commonlog.txt") #По сигналу кнопки (пин 21) управляется устройство (27 пин), пишется лог работы кнопки
+    button(21, 17) #По сигналу кнопки (пин 21) управляется устройство (27 пин), пишется лог работы кнопки
     
     #Активация веб-интерфейса. Дублируем для каждого устройства, управляемого через веб-интерфейс
+    device(2)
+    device(3)
+    device(4)
+    device(14)
+    device(15)
     device(17)
     device(18)
     device(22)
     device(27)
-
-
+    
 # ------------- ВЫХОД ----------------
 
 #Прибираемся при перезагрузке/рестарте
