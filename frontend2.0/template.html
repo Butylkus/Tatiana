@@ -58,117 +58,16 @@
 								<p>Нажатие включает и выключает соответствующее устройство</p>
 							</header>
 
-<!-- рассчитано на 4 колонки!
-Должно быть строго 4 <div class="4u 12u$(mobile)">, в которые вкладываются артикли.
-Логика генератора выглядит так:
-<кол1>   <кол2>   <кол3>   <кол4>
-%BTN1%   %BTN2%   %BTN3%   %BTN4%
-%BTN5%   %BTN6%   %BTN7%   %BTN8%
-%BTN9%   %BTN10%  %BTN11%  %BTN12%
-и так далее до 27 (красиво 26 и 27 во 2й и 3й столбец!).
--->
-
 							<!-- КНОПКИ УПРАВЛЕНИЯ -->
 							<div class="row">
-								<div class="4u 12u$(mobile)">
-<!-- весь артикль надо делать онклик -->
-                                        <article class="item">
-										<img src="images/butoff.png" alt="" class="image fit"/>
-										<header>
-											<h3>Люстра в зале</h3>
-										</header>
-									</article>
-<!-- // Конец артикля. Этот блок должен попадать поочерёдно в первый, второй, третий и четвёртый родительский див, чтобы дизайн не расколбасило -->
-									<article class="item">
-										<img src="images/butoff.png" alt="" class="image fit"/>
-										<header>
-											<h3>ванная</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Толкан</h3>
-										</header>
-									</article>
-                                </div>
-								<div class="4u 12u$(mobile)">
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Люстра в зале</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>ванная</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Толкан</h3>
-										</header>
-									</article>
-                                </div>
-								<div class="4u 12u$(mobile)">
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Люстра в зале</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>ванная</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Толкан</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Ризетка в зале</h3>
-										</header>
-									</article>
-                                </div>
-								<div class="4u 12u$(mobile)">
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Люстра в зале</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>ванная</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Толкан</h3>
-										</header>
-									</article>
-									<article class="item">
-										<img src="images/buton.png" alt="" class="image fit"/>
-										<header>
-											<h3>Ризетка в зале</h3>
-										</header>
-									</article>
-                                </div>
+							<div id="buttons" class="controlbutton">
+							<!--Здесь будут отрисованы кнопки. Ничего вписывать не надо! -->
+							</div>
                             </div>
 							
 							<footer>
-								<a href="#main" class="button scrolly">Уточнить состояние приборов</a>
-								<!--просто едет обратно к главному экрану, но можно добавить и подзагрузку статусов для верности-->
+								<a href="#log" class="button scrolly">Проверить записи Татьяны</a>
+								<!--Ссылаться можно куда угодно-->
 							</footer>
 
 						</div>
@@ -257,6 +156,8 @@
 			<script src="assets/js/util.js"></script>
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="assets/js/main.js"></script>
+            <script type="text/javascript" src="assets/js/jquery.js"></script>
+            <script type="text/javascript" src="assets/js/function.js"></script>
 
 	</body>
 </html>
