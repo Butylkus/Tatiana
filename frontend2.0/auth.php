@@ -28,14 +28,8 @@ if (isset($_GET['action']) and $_GET['action']=="logout") {
 
 
 if (!isset($_SESSION['authorizedsids'][$_COOKIE['sid']]) or !isset($_COOKIE['sid']) or $_SESSION['authorizedsids'][$_COOKIE['sid']] != "authorised") {
-?>
-<form method="POST">
-<input type="text" name="user"><br>
-<input type="password" name="password"><br>
-<input type="submit">
-</form>
-<?php 
-exit();
+    echo file_get_contents("loginform.html");
+    exit();
 }
 
 
