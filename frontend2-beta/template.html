@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Татьяна - умная домохозяйка в умном доме</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+	</head>
+	<body>
+
+		<!-- шапка -->
+			<div id="header">
+
+				<div class="top">
+
+					<!-- Инфа -->
+						<div id="logo">
+							<!-- Инфа -->
+							<h1 id="title">Татьяна дома</h1>
+							<p>В работе  уже %UPTIME%</p>
+							<p>Время: %MENUDATE%</p>
+							<p>Дома: %INTEMP%, на улице: %OUTTEMP%</p>
+						</div>
+
+					<!-- менюшка -->
+						<nav id="nav">
+							<ul>
+								<li><a href="#main" id="top-link" class="skel-layers-ignoreHref"><span class="icon fa-home">Управление</span></a></li>
+								<li><a href="#plan" id="portfolio-link" class="skel-layers-ignoreHref"><span class="icon fa-clock-o">Планирование</span></a></li>
+								<li><a href="#log" id="about-link" class="skel-layers-ignoreHref"><span class="icon fa-eye">События</span></a></li>
+								<li><a href="#service" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-linux">Сервис</span></a></li>
+								<li><a href="%LOGOUT%" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-sign-out">Выход</span></a></li>
+							</ul>
+						</nav>
+
+				</div>
+
+				<div class="bottom">
+
+					<!-- футер менюхи. Всякий треш -->
+
+
+				</div>
+
+			</div>
+
+		<!-- основное поле -->
+			<div id="main">
+
+				<!-- управление домом -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt">Управление домом</h2>
+								<p>Нажатие включает и выключает соответствующее устройство</p>
+							</header>
+
+							<!-- КНОПКИ УПРАВЛЕНИЯ -->
+							<div class="row">
+							<div id="buttons" class="controlbutton">
+							<!--Здесь будут отрисованы кнопки. Ничего вписывать не надо! -->
+							</div>
+                            </div>
+							
+							<footer>
+								<a href="#log" class="button scrolly">Проверить записи Татьяны</a>
+								<!--Ссылаться можно куда угодно-->
+							</footer>
+
+						</div>
+					</section>
+
+				<!-- планирование -->
+					<section id="plan" class="two">
+						<div class="container">
+
+							<header>
+								<h2>Планирование</h2>
+							</header>
+
+							<p>Здесь будет хитрожопая система вывода плана и форма редактирования. Пока хз как именно, но уж точно лучше старой!</p>
+                            <p>Вот список дел на сегодня. И на завтра...</p>
+                            <center>
+                            <table class="default">
+                            <tr><th style="width: 60%;">Устройство</th><th style="width: 20%;">Вкл</th><th style="width: 20%;">Выкл</th>
+                            %PLAN%
+                            </table>
+                            </center>
+
+						</div>
+
+						<footer>
+                            <a href="#main" class="button scrolly">Назад к управлению</a>
+						</footer>
+						
+						</section>
+
+				<!-- Логи -->
+					<section id="log" class="three">
+						<div class="container">
+
+							<header>
+								<h2>Что творилось в доме</h2>
+								<p>Последние ХХХ событий (настраиваемо - фича в наличии уже, можно даже гетом добавить, кстати...)</p>
+							</header>
+
+
+
+							<p>Собственно, тут прямой вывод лога в человекопонятном виде: имж КАК текст ЧТО КОГДА.</p>
+
+							%LOG%
+                            <div class="logtab">
+                            </div>
+							
+							
+							<footer>
+								<a href="#main" class="button scrolly">Назад к управлению</a>
+							</footer>
+
+						</div>
+					</section>
+
+				<!-- Сервисная страница -->
+				
+					<section id="service" class="four">
+						<div class="container">
+
+							<header>
+								<h2>Обслуживание системы</h2>
+							</header>
+
+							<p>Старт системы: %UPTIME%</p>
+							<p>Татьяна в дереве процессов: %IS TATIANA.PY RUNNING%</p>
+
+
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+                <p>Разработано: Бутылкус и компания<br />
+                Распространяется по законам GPL<br />
+                Авторы не несут ответственности за любые последствия результатов работы программно-аппаратного комплекса "Татьяна - умная домохозяйка" или отдельных их компонентов!
+                </p>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollzer.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+            <script type="text/javascript" src="assets/js/jquery.js"></script>
+            <script type="text/javascript" src="assets/js/function.js"></script>
+
+	</body>
+</html>
