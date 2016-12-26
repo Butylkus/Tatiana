@@ -21,8 +21,8 @@ body {
 	border-radius: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;		
-	margin: 8em auto 0 auto;
-	width: 300px;
+	margin: auto auto 0 auto;
+	max-width: 600px;
   font-family: 'Open Sans', sans-serif;
 	font-size: 16px;
   -webkit-box-shadow:  0px 10px 20px 0px rgba(0, 0, 0, 0.3);
@@ -52,7 +52,7 @@ body {
 
 #login-form fieldset form {
 	overflow: hidden;
-	width: 270px;
+	width: 100%;
 }
 
 #login-form fieldset form input {
@@ -69,29 +69,30 @@ body {
 
 #login-form fieldset form input[type="username"] {
 	border: 1px solid #292829;
-	border-radius: 3px 3px 0px 0px;
-	-moz-border-radius: 3px 3px 0px 0px;
-	-webkit-border-radius: 3px 3px 0px 0px;
+	border-top: none;
+	border-radius: 0px 0px 10px 10px;
+	-moz-border-radius: 0px 0px 3px 3px;
+	-webkit-border-radius: 0px 0px 3px 3px;
 	padding: 12px 10px;
-	width: 88%;
-  -webkit-appearance:none;
+	width: 100%;
+	-webkit-appearance: none;
 }
 
 #login-form fieldset form input[type="password"] {
 	border: 1px solid #292829;
 	border-top: none;
-	border-radius: 0px 0px 3px 3px;
+	border-radius: 0px 0px 10px 10px;
 	-moz-border-radius: 0px 0px 3px 3px;
 	-webkit-border-radius: 0px 0px 3px 3px;
 	padding: 12px 10px;
-	width: 88%;
-  -webkit-appearance:none;
+	width: 100%;
+	-webkit-appearance: none;
 }
 
 #login-form fieldset form input[type="submit"] {
 	background-color: #ebebeb;
 	border: none;
-	border-radius: 3px;
+	border-radius: 10px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
 	color: #404040;
@@ -100,8 +101,8 @@ body {
 	font-weight: bold;
 	margin-top: 20px;
 	padding: 12px 12px;
-    width: 96%;
-  -webkit-appearance: none;
+	width: 100%;
+	/* -webkit-appearance: none; */
 }
 
 #login-form fieldset form input[type="submit"]:hover {
@@ -136,43 +137,49 @@ body {
 	color: #eb6d1a;
 }
 
-/* Стили бара vladmaxi, можно удалить */
-.vladmaxi-top{
-	line-height: 24px;
-	font-size: 11px;
-	background: #eee;
-	text-transform: uppercase;
-	z-index: 9999;
-	position: fixed;
-	top:0;
-	left:0;
-	width:100%;
-	font-family: calibri;
-	font-size: 13px;
-	box-shadow: 1px 0px 2px rgba(0,0,0,0.2);
-	-webkit-animation: slideOut 0.5s ease-in-out 0.3s backwards;
-}
-@-webkit-keyframes slideOut{
-	0%{top:-30px; opacity: 0;}
-	100%{top:0px; opacity: 1;}
-}
-
-.vladmaxi-top a{
-	padding: 0px 10px;
-	letter-spacing: 1px;
-	color: #333;
-	text-shadow: 0px 1px 1px #fff;
-	display: block;
-	float: left;
-	text-decoration:none;
-}
-.vladmaxi-top a:hover{
-	background: #fff;
-}
-.vladmaxi-top span.right{
-	float: right;
-}
-.vladmaxi-top span.right a{
-	float: left;
-	display: block;
+@media (orientation:portrait) {
+    body {
+        color: #ff8b3d;
+        font-family: 'Sans', sans-serif;
+        font-size: 16px;
+        width: 90%;
+        height:90%;
+    }
+    
+    #login-form {
+        background-color: #363636;
+        border-radius: 5px;
+        margin: auto;
+        width: 88%;
+        font-family: 'Sans', sans-serif;
+        box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.3);
+    }
+    
+    #login-form fieldset form {
+        overflow: hidden;
+        width: auto;
+    }
+    #login-form fieldset form input[type="username"] {
+        border: 1px solid #292829;
+        width: 100%;
+    }
+    #login-form fieldset form input[type="password"] {
+        border: 1px solid #292829;
+        width: 100%;
+    }
+    #login-form fieldset form input[type="submit"] {
+        border: 1px solid #292829;
+        width: 100%;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
