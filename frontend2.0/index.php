@@ -29,15 +29,29 @@ function pintoname($pin_name,$plan){
 }
 
 function logout(){
-$logout = "http://".$_SERVER['HTTP_HOST']."/auth.php?action=logout";
-return $logout;
+    $logout = "http://".$_SERVER['HTTP_HOST']."/auth.php?action=logout";
+    return $logout;
+}
+
+function uptime(){
+    return exec("uptime -s");
+}
+
+function check_tatiana(){
+    exec('ps ax | grep tatiana',$mainpid);
+    if (stristr($mainpid[0],"tatiana.py")){
+        return "<span class='green'>трудится =)</span>";
+    }else{
+        return "<span class='red'>УПАЛА! =(</span>";
+    }
 }
 
 
-
 $echoer = file_get_contents("template.html");
-$echoer = str_replace("%PLAN%",show_plan(pintoname($pin_name,$planfile)),$echoer);
-$echoer = str_replace("%LOGOUT%",logout(),$echoer);
+$echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,$planfile)),$echoer);
+$echoer = str_replace("%LOGOUT%", logout(),$echoer);
+$echoer = str_replace("%UPTIME%", uptime(),$echoer);
+$echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),$echoer);
 echo $echoer;
 
 ?>
