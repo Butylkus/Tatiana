@@ -1,5 +1,5 @@
 <?php
-include_once('settings.php');
+include_once 'sys/settings.php';
 session_start();
 
 if (isset($_POST['user']) && isset($_POST['password']) or $_SESSION['authorizedsids'][$_COOKIE['sid']] =="authorised")
