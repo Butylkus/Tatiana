@@ -40,9 +40,20 @@ function uptime(){
 function check_tatiana(){
     exec('ps ax | grep tatiana',$mainpid);
     if (stristr($mainpid[0],"tatiana.py")){
-        return "<span class='green'>трудится =)</span>";
+        return "<span class='green'>трудится</span>";
     }else{
         return "<span class='red'>УПАЛА! =(</span>";
+    }
+}
+
+function cpu_temp(){
+    $string = exec('cat /sys/class/thermal/thermal_zone0/temp');
+    if ($string<45000){
+        return "<span class='blue'>прохладно (". round($string/1000, 1) ."&deg;C)</span>";
+    }elseif ($string>55000){
+        return "<span class='red'>ЖАРКО! (". round($string/1000, 1) ."&deg;C)</span>";
+    }else{
+        return "<span class='green'>комфортно (". round($string/1000, 1) ."&deg;C)</span>";
     }
 }
 
@@ -52,6 +63,7 @@ $echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,$planfile)),$echoe
 $echoer = str_replace("%LOGOUT%", logout(),$echoer);
 $echoer = str_replace("%UPTIME%", uptime(),$echoer);
 $echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),$echoer);
+$echoer = str_replace("%CPUTEMP%", cpu_temp(),$echoer);
 echo $echoer;
 
 ?>
