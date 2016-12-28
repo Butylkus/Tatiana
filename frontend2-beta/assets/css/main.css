@@ -1626,7 +1626,7 @@
 	}
 
 	strong, b {
-		font-weight: 300;and 
+		font-weight: bold; 
 		color: #666;
 	}
 
@@ -2122,7 +2122,7 @@
 				#nav ul li a.active span:before {
 					color: #e27689;
 				}
- font-size: 1em; margin:5px 5px 5px 5px; width: 30%; padding: 0.75em 0.3em 0.75em 0.3em;
+
 /* Footer */
 
 	#footer {
@@ -2583,4 +2583,19 @@
      margin:5px 5px 5px 5px;
      width: 30%;
      padding: 0.75em 0.3em 0.75em 0.3em;
+}
+
+.green {
+    color: #86c686;
+    font-weight: bold;
+}
+
+.red {
+    color: #f00;
+    font-weight: bold;
+}
+
+.blue {
+    color: #2283c0;
+    font-weight: bold;
 }
