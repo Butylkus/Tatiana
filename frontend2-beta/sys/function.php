@@ -1,4 +1,7 @@
 <?php
+
+include_once 'settings.php';
+
 function writeLog($pinNum)
 {
 
@@ -40,18 +43,29 @@ return json_encode($res);
 }
 
 
-function readLog($num=1)
+function readLog($num=1, &$pin_name)
 {
     $echer = file_get_contents(LOGFILE);
     $echer = str_replace(" ", "&nbsp;", $echer);
-    $echer = str_replace("%WEBON%", "<img src='images/logwebon.png' class='logpicture'>", $echer);
-    $echer = str_replace("%WEBOFF%", "<img src='images/logweboff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%PLANON%", "<img src='images/logplanon.png' class='logpicture'>", $echer);
-    $echer = str_replace("%PLANOFF%", "<img src='images/logplanoff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%BUTTONOFF%", "<img src='images/logbutoff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%BUTTONON%", "<img src='images/logbuton.png' class='logpicture'>", $echer);
-    $echer = str_replace("%UP%", "<img src='images/logsysup.png' class='logpicture'>", $echer);
-    $echer = str_replace("%DOWN%", "<img src='images/logsysdown.png' class='logpicture'>", $echer);
+
+    for($i = 1; $i < 28; $i++) 	   {
+        if (isset($pin_name[$i])){
+            $searchstring="%&nbsp;". $i ."&nbsp;>";
+            $replacestring="%&nbsp;". $pin_name[$i] . "&nbsp;>";
+            $echer = str_replace($searchstring, $replacestring, $echer);
+        }
+    }
+	   
+
+    
+    $echer = str_replace("%WEBON%", "<span class='logleft'><img src='images/logwebon.png' class='logpicture'>", $echer);
+    $echer = str_replace("%WEBOFF%", "<span class='logleft'><img src='images/logweboff.png' class='logpicture'>", $echer);
+    $echer = str_replace("%PLANON%", "<span class='logleft'><img src='images/logplanon.png' class='logpicture'>", $echer);
+    $echer = str_replace("%PLANOFF%", "<span class='logleft'><img src='images/logplanoff.png' class='logpicture'>", $echer);
+    $echer = str_replace("%BUTTONOFF%", "<span class='logleft'><img src='images/logbutoff.png' class='logpicture'>", $echer);
+    $echer = str_replace("%BUTTONON%", "<span class='logleft'><img src='images/logbuton.png' class='logpicture'>", $echer);
+    $echer = str_replace("%UP%", "<span class='logleft'><img src='images/logsysup.png' class='logpicture'>", $echer);
+    $echer = str_replace("%DOWN%", "<span class='logleft'><img src='images/logsysdown.png' class='logpicture'>", $echer);
     
 	$echer = explode("\n",$echer);
 	$echer = array_reverse($echer);
