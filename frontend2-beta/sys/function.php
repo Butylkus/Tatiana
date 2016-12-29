@@ -1,7 +1,4 @@
 <?php
-
-include_once 'settings.php';
-
 function writeLog($pinNum)
 {
 
@@ -43,7 +40,7 @@ return json_encode($res);
 }
 
 
-function readLog($num=1, &$pin_name)
+function readLog($num=1,$pin_name)
 {
     $echer = file_get_contents(LOGFILE);
     $echer = str_replace(" ", "&nbsp;", $echer);
