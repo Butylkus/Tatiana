@@ -12,7 +12,7 @@
 #
 
 
-version = "0.6.1b" 
+version = "0.6.1-1b" 
 
 import time
 from datetime import datetime
@@ -90,7 +90,7 @@ def plan(planfile=default_path + "plans/plan.txt", statusfile=default_path + "st
             f.close()
             device(int(pin))
             f = open(logfile, "a")
-            f.write("%PLANON%      " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
+            f.write("%PLANON% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
             f.close()
             while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
                 continue
@@ -100,7 +100,7 @@ def plan(planfile=default_path + "plans/plan.txt", statusfile=default_path + "st
             f.close()
             device(int(pin))
             f = open(logfile, "a")
-            f.write("%PLANOFF%      " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
+            f.write("%PLANOFF% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
             f.close()
             while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
                 continue
@@ -176,7 +176,7 @@ def button(pin_in, pin_out, logfile=default_path + "commonlog.txt"):
 # ------------- ИСПОЛНЕНИЕ ----------------
 
 f = open(default_path + "commonlog.txt", "a")
-f.write("%UP%         > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+f.write("%UP% > v" + str(version) + " "  + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
 f.close()
 
 # ------------- ГЛАВНЫЙ ЦИКЛ ----------------
@@ -207,6 +207,6 @@ while True:
 #Прибираемся при перезагрузке/рестарте
 GPIO.cleanup() 
 f = open(default_path + "commonlog.txt", "a")
-f.write("%DOWN%         > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
 f.close()
 sys.exit()
