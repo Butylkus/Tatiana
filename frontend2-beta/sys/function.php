@@ -4,6 +4,7 @@ function writeLog($pinNum)
 
    $fg = file_get_contents(STATUSES.$pinNum);
    $stfile = fopen(LOGFILE,"a");
+   flock($stfile,LOCK_EX);
    $moment = date('d.m.Y H:i:s');
    
    switch($fg)
@@ -15,22 +16,22 @@ function writeLog($pinNum)
 	           $res = array(
 			   "error"    => 0,
 			   "pin"      => $pinNum,
-			   "log"      => "%WEBON%  $pinNum > $moment",
-			   "filedata" => 1
+			   "log"      => "%WEBOFF% $pinNum > $moment",
+			   "filedata" => 0
 			   );
 			   
-	           fwrite($stfile,"%WEBON%     $pinNum > $moment\n");
+	           fwrite($stfile,"%WEBOFF% $pinNum > $moment\n");
 	  break;
 	  
 	  case 0:
 	  	       $res = array(
 			   "error"    => 0,
 			   "pin"      => $pinNum,
-			   "log"      => "%WEBOFF% $pinNum > $moment",
-			   "filedata" => 0
+			   "log"      => "%WEBON% $pinNum > $moment",
+			   "filedata" => 1
 			   );
 			   
-	           fwrite($stfile,"%WEBOFF%     $pinNum > $moment\n"); 
+	           fwrite($stfile,"%WEBON% $pinNum > $moment\n"); 
 	  break;
 	  
    }
@@ -45,7 +46,7 @@ function readLog($num=1)
     $echer = str_replace(" ", "&nbsp;", $echer);
     $echer = str_replace("%WEBON%", "<img src='images/logwebon.png' class='logpicture'>", $echer);
     $echer = str_replace("%WEBOFF%", "<img src='images/logweboff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%PLANON%", "<img src='images/loglogplanon.png' class='logpicture'>", $echer);
+    $echer = str_replace("%PLANON%", "<img src='images/logplanon.png' class='logpicture'>", $echer);
     $echer = str_replace("%PLANOFF%", "<img src='images/logplanoff.png' class='logpicture'>", $echer);
     $echer = str_replace("%BUTTONOFF%", "<img src='images/logbutoff.png' class='logpicture'>", $echer);
     $echer = str_replace("%BUTTONON%", "<img src='images/logbuton.png' class='logpicture'>", $echer);

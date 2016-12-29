@@ -34,7 +34,7 @@ $res = array(
 		
 		//Если в файле содержится число 0 генерируем красную кнопку в противном случаи зелёную
 		
-		if($p == 0)
+		if($p == 1)
 	    { 
 	
 		   array_push($res['dev'], array(
@@ -69,11 +69,11 @@ case'switch_button':
    switch($status)
    {
     case 1:
-            $status = 0;
+            $status = 1;
     break;
 	
     case 0:
-            $status = 1;
+            $status = 0;
     break;
 
    default: print '{"error":1,"info":"Ехай на хуй отсюда"}';

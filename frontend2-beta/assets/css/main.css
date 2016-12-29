@@ -2604,3 +2604,7 @@
     color: #2283c0;
     font-weight: bold;
 }
+
+.loglist {
+	margin-top: -1em;
+}
