@@ -11,7 +11,7 @@ case'is_change_log':
 break;
 case'log_query':
 
-   print readLog(30);
+   print readLog(30,$pin_name);
    
 break;
 case "status_check":

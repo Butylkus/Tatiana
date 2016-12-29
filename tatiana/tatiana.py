@@ -176,7 +176,7 @@ def button(pin_in, pin_out, logfile=default_path + "commonlog.txt"):
 # ------------- ИСПОЛНЕНИЕ ----------------
 
 f = open(default_path + "commonlog.txt", "a")
-f.write("%UP% > v" + str(version) + " "  + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+f.write("%UP% > "  + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
 f.close()
 
 # ------------- ГЛАВНЫЙ ЦИКЛ ----------------

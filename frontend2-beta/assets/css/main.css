@@ -2606,5 +2606,20 @@
 }
 
 .loglist {
-	margin-top: -1em;
+	margin: -1em auto -1em auto;
+	max-width: 600px;
+}
+
+.logger {
+	width: 100%;
+}
+
+.logleft {
+	width: 65%;
+	float: left;
+	text-align: left;
+}
+
+.logright {
+    text-align: right;
 }

@@ -40,18 +40,30 @@ return json_encode($res);
 }
 
 
-function readLog($num=1)
+function readLog($num=1,$pin_name)
 {
     $echer = file_get_contents(LOGFILE);
     $echer = str_replace(" ", "&nbsp;", $echer);
-    $echer = str_replace("%WEBON%", "<img src='images/logwebon.png' class='logpicture'>", $echer);
-    $echer = str_replace("%WEBOFF%", "<img src='images/logweboff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%PLANON%", "<img src='images/logplanon.png' class='logpicture'>", $echer);
-    $echer = str_replace("%PLANOFF%", "<img src='images/logplanoff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%BUTTONOFF%", "<img src='images/logbutoff.png' class='logpicture'>", $echer);
-    $echer = str_replace("%BUTTONON%", "<img src='images/logbuton.png' class='logpicture'>", $echer);
-    $echer = str_replace("%UP%", "<img src='images/logsysup.png' class='logpicture'>", $echer);
-    $echer = str_replace("%DOWN%", "<img src='images/logsysdown.png' class='logpicture'>", $echer);
+
+    foreach ($pin_name as $pin=>$name) {
+        $searchstring="%&nbsp;". $pin ."&nbsp;>";
+        $replacestring="%&nbsp;". $name ."&nbsp;</div><div class='logright'>";
+        $echer = str_replace($searchstring, $replacestring, $echer);
+    }
+	   
+
+    
+    $echer = str_replace("%WEBON%", "<div class='logleft'><img src='images/logwebon.png' class='logpicture' title='Включено через веб-интерфейс'>", $echer);
+    $echer = str_replace("%WEBOFF%", "<div class='logleft'><img src='images/logweboff.png' class='logpicture' title='Выключено через веб-интерфейс'>", $echer);
+    $echer = str_replace("%PLANON%", "<div class='logleft'><img src='images/logplanon.png' class='logpicture' title='Запланированное включение'>", $echer);
+    $echer = str_replace("%PLANOFF%", "<div class='logleft'><img src='images/logplanoff.png' class='logpicture' title='Запланированное выключение'>", $echer);
+    $echer = str_replace("%BUTTONOFF%", "<div class='logleft'><img src='images/logbutoff.png' class='logpicture' title='Выключено нажатием на кнопку'>", $echer);
+    $echer = str_replace("%BUTTONON%", "<div class='logleft'><img src='images/logbuton.png' class='logpicture' title='Включено нажатием на кнопку'>", $echer);
+    $echer = str_replace("%UP%&nbsp;>", "<div class='logleft'><img src='images/logsysup.png' class='logpicture' title='Я проснулась! =)'>За работу!</div><div class='logright'>", $echer);
+    $echer = str_replace("%DOWN%&nbsp;>", "<div class='logleft'><img src='images/logsysdown.png' class='logpicture' title='Я заснула...'>Татьяна отдыхает</div><div class='logright'>", $echer);
+    $echer = str_replace("%IRON%", "<div class='logleft'><img src='images/logiron.png' class='logpicture' title='Включено пультом ДУ'>", $echer);
+    $echer = str_replace("%IROFF%", "<div class='logleft'><img src='images/logiroff.png' class='logpicture' title='Выключено пультом ДУ'>", $echer);
+    $echer = str_replace("\n", "</div>\n", $echer);
     
 	$echer = explode("\n",$echer);
 	$echer = array_reverse($echer);
