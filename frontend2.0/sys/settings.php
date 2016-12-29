@@ -1,7 +1,7 @@
 <?php
 
 #Логин и пароль для авторизации
-$user="user";
+$login="user";
 $password="password";
 
 #Массив инициализации. Каждому пину должно соответствовать название, которое будет отображено в веб-интерфейсе
@@ -26,10 +26,7 @@ $input_pin[1] = 'Главный рубильник';
 
 
 #Пути по умолчанию
-$planfile = '/home/pi/tatiana/plans/plan.txt'; #файл плана включения и выключения
-$logfile = '/home/pi/tatiana/commonlog.txt'; #файл общего лога работы
-$statuses = '/home/pi/tatiana/status/'; #путь к файлам статусов
-
-
-
+define("PLANFILE","/home/pi/tatiana/plans/plan.txt");     #файл плана включения и выключения
+define("LOGFILE","/home/pi/tatiana/commonlog.txt"); #файл общего лога работы
+define("STATUSES","/home/pi/tatiana/status/"); #путь к файлам статусов
 ?> 

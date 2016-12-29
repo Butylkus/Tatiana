@@ -5,7 +5,7 @@
      exit();
  }
 
-include_once('settings.php');
+include_once 'sys/settings.php';
 
 function show_plan($plan){
     #$echer=file_get_contents($plan);
@@ -59,7 +59,7 @@ function cpu_temp(){
 
 
 $echoer = file_get_contents("template.html");
-$echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,$planfile)),$echoer);
+$echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,PLANFILE)),$echoer);
 $echoer = str_replace("%LOGOUT%", logout(),$echoer);
 $echoer = str_replace("%UPTIME%", uptime(),$echoer);
 $echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),$echoer);

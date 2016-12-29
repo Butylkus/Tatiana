@@ -2578,6 +2578,11 @@
 	}
 
 	
+.logpicture {
+	width: 35px;
+	vertical-align: middle;
+}	
+	
 .action {
      font-size: 1em;
      margin:5px 5px 5px 5px;

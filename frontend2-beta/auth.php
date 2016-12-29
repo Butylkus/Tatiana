@@ -4,7 +4,7 @@ session_start();
 
 if (isset($_POST['user']) && isset($_POST['password']) or $_SESSION['authorizedsids'][$_COOKIE['sid']] =="authorised")
 {
-    if ($_POST['user']==$user && $_POST['password']==$password)
+    if ($_POST['user']==$login && $_POST['password']==$password)
     {
         header("Location: http://".$_SERVER['HTTP_HOST']."/");
         $_SESSION['ssid']=session_id();

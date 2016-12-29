@@ -59,7 +59,7 @@ function cpu_temp(){
 
 
 $echoer = file_get_contents("template.html");
-$echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,LOGFILE)),$echoer);
+$echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,PLANFILE)),$echoer);
 $echoer = str_replace("%LOGOUT%", logout(),$echoer);
 $echoer = str_replace("%UPTIME%", uptime(),$echoer);
 $echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),$echoer);
