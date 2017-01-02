@@ -2623,3 +2623,8 @@
 .logright {
     text-align: right;
 }
+
+#lastTimeAuth{
+     color: #cc3533;
+     font-weight: bold;
+}
