@@ -1,58 +1,47 @@
 <?php
+//Запись в лог
+
 function writeLog($pinNum)
 {
-
-   $fg = file_get_contents(STATUSES.$pinNum);
+   $pin = mysql_fetch_assoc( mysql_query("SELECT `status` FROM `pins` WHERE `pin` = '{$pinNum}'") );
    $stfile = fopen(LOGFILE,"a");
-   flock($stfile,LOCK_EX);
    $moment = date('d.m.Y H:i:s');
    
-   switch($fg)
+   switch($pin['status'])
    {
-//pin - имя статус файла он же номер пина
-//filedata - содержимое статус-файла. Позвояет проверить был ли изменён статус.
-
+	   
 	  case 1:
-	           $res = array(
-			   "error"    => 0,
-			   "pin"      => $pinNum,
-			   "log"      => "%WEBOFF% $pinNum > $moment",
-			   "filedata" => 0
-			   );
+               $res = '{"statusDB",1}';
 			   
-	           fwrite($stfile,"%WEBOFF% $pinNum > $moment\n");
+	           fwrite($stfile,"%WEBON% $pinNum > $moment\n");
 	  break;
 	  
 	  case 0:
-	  	       $res = array(
-			   "error"    => 0,
-			   "pin"      => $pinNum,
-			   "log"      => "%WEBON% $pinNum > $moment",
-			   "filedata" => 1
-			   );
+	  	       $res = '{"statusDB",0}';
 			   
-	           fwrite($stfile,"%WEBON% $pinNum > $moment\n"); 
+	           fwrite($stfile,"%WEBOFF% $pinNum > $moment\n"); 
 	  break;
 	  
    }
 fclose($stfile);
-return json_encode($res);
+return $res;
 }
 
-
-function readLog($num=1,$pin_name)
+//Вывод Лога
+ 
+function readLog($num=1)
 {
     $echer = file_get_contents(LOGFILE);
     $echer = str_replace(" ", "&nbsp;", $echer);
-
-    foreach ($pin_name as $pin=>$name) {
-        $searchstring="%&nbsp;". $pin ."&nbsp;>";
-        $replacestring="%&nbsp;". $name ."&nbsp;</div><div class='logright'>";
-        $echer = str_replace($searchstring, $replacestring, $echer);
+    $rq = mysql_query("SELECT `pin`,`name` FROM `pins` WHERE `direction` = 'output' ORDER BY `pin` ASC");
+	
+    while ($row = mysql_fetch_assoc($rq)) {
+        $searchStr  = "%&nbsp;". $row['pin'] ."&nbsp;>";
+        $replaceStr = "%&nbsp;". $row['name'] ."&nbsp;</div><div class='logright'>";
+        $echer = str_replace($searchStr, $replaceStr, $echer);
     }
 	   
 
-    
     $echer = str_replace("%WEBON%", "<div class='logleft'><img src='images/logwebon.png' class='logpicture' title='Включено через веб-интерфейс'>", $echer);
     $echer = str_replace("%WEBOFF%", "<div class='logleft'><img src='images/logweboff.png' class='logpicture' title='Выключено через веб-интерфейс'>", $echer);
     $echer = str_replace("%PLANON%", "<div class='logleft'><img src='images/logplanon.png' class='logpicture' title='Запланированное включение'>", $echer);
@@ -79,4 +68,72 @@ function readLog($num=1,$pin_name)
 	   
        return $res;	   
 }
+
+
+//Функция logout хрен понять зачем, но Бутылкусу видней)
+
+function logout(){
+    $logout = "http://".$_SERVER['HTTP_HOST']."/auth.php?logout";
+    return $logout;
+}
+
+
+
+function uptime(){
+    return exec("uptime -s");
+}
+
+
+//Проверяем трудится Татьяна или шлангует))
+
+function check_tatiana(){
+    exec('ps ax | grep tatiana',$mainpid);
+    if (stristr($mainpid[0],"tatiana.py")){
+        return "<span class='green'>трудится</span>";
+    }else{
+        return "<span class='red'>УПАЛА! =(</span>";
+    }
+}
+
+
+//Проверяем не жарко ли Татьяне. 
+//Женщины не любят резких температурных перепадов)
+
+function cpu_temp(){
+    $string = exec('cat /sys/class/thermal/thermal_zone0/temp');
+    if ($string<45000){
+        return "<span class='blue'>прохладно (". round($string/1000, 1) ."&deg;C)</span>";
+    }elseif ($string>55000){
+        return "<span class='red'>ЖАРКО! (". round($string/1000, 1) ."&deg;C)</span>";
+    }else{
+        return "<span class='green'>комфортно (". round($string/1000, 1) ."&deg;C)</span>";
+    }
+}
+
+
+//Функции планироващика
+
+function show_plan($plan){
+    #$echer=file_get_contents($plan);
+    $echer = "\n".$plan;
+    $echer = str_replace("\n", "%LINEEND%", $echer);
+    $echer = str_replace(">", "%ONTIME%", $echer);
+    $echer = str_replace("<", "%OFFTIME%", $echer);
+    $echer = str_replace("%LINEEND%", "</tr>\n<tr>\n<td>", $echer);
+    $echer = str_replace("%ONTIME%", "</td>\n<td class='onplan'>", $echer);
+    $echer = str_replace("%OFFTIME%", "</td>\n<td class='offplan'>", $echer);
+    $echer = str_replace("%NEWLINE%", "</td>\n</tr>", $echer);
+    return $echer;
+}
+
+
+
+function pintoname($pin_name,$plan){
+    $plan = file_get_contents($plan);
+    foreach ($pin_name as $pin=>$name){
+        $plan = str_replace($pin.">", $name.">", $plan);
+    }
+    return $plan;
+}
+
 ?>
