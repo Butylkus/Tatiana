@@ -10,11 +10,10 @@ function buttonLoad()
 {
      xhr = $.ajax
            ({
-               type: 'post',
-               url: 'server.php',
-               data: 'act=status_check',
-               dataType: 'json'
-
+                type: 'post',
+                url: 'server.php',
+                data: 'act=status_check',
+                dataType: 'json'
            });
 		   
 	xhr.done(function(data){
@@ -90,26 +89,28 @@ setTimeout(function isChangeLog()
                    type: 'post',
                    url: 'server.php',
                    data: 'act=is_change_log',
-                   dataType: 'html'
+                   dataType: 'json'
               });
 
 	  
-      req.done(function(lastTimeUpdate){
-		  
-          if(time != lastTimeUpdate)
-		     {
-			    time = lastTimeUpdate;
-			    readLog();
-			    buttonLoad();
-			    console.log('Лог был обновлён' +time);
-		     }
-		        setTimeout(isChangeLog, freqLog); 
-		
+      req.done(function(data){
+		  if(data.error == 0)
+		  {
+             if(time != data.lastTimeUpdate)
+		      {
+			     time = data.lastTimeUpdate;
+			     readLog();
+			     buttonLoad();
+			     console.log('Лог был обновлён ' +time);
+		      }
+		         setTimeout(isChangeLog, freqLog); 
+		   }
+		     else{location.href = 'auth.php?logout';}
 	      });
 
       
       req.fail(function(err){
-	  console.log('isChangeLog()'+err);
+	  console.log('Ошибка в функции isChangeLog()');
 	  });
 	  
     }, freqLog);
@@ -126,16 +127,15 @@ function request(e)
 	  
        req = $.ajax
               ({
-                  type: 'post',
-                  url: 'server.php',
-                  data: 'act=switch_button&pin='+pin+'&power_status='+power_status,
-                  dataType: 'json'
-
+                   type: 'post',
+                   url: 'server.php',
+                   data: 'act=switch_button&pin='+pin+'&power_status='+power_status,
+                   dataType: 'json'
               });
 
 			  
     req.done(function(data){
-	   
+
 /* Если ошибок не возникло меняем цвет кнопки */
    if(data.error == 0)
    {
@@ -144,7 +144,7 @@ function request(e)
             и соответствующим образом меняет цвет кнопки(Именно той по которой был клик),
             а так же меняет значение атрибута data-status */
 
-        if(data.filedata < 1)
+        if(data.status < 1)
         {
              $('[data-num-pin="' +data.pin+ '"]')
 			 .css("background-color","rgba(200,0,0,0.5)")
@@ -158,8 +158,12 @@ function request(e)
              .attr('data-status',1);
         }
 		
-		 console.log('pin : ' +data.pin+ ' status : ' +data.filedata);
-   }   
+		 console.log('pin : ' +data.pin+ ' status : ' +data.status);
+   }
+      else
+	  {
+		 console.log(data.info);
+	  }   
    });
    
    req.fail(function(err){
