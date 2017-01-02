@@ -2,34 +2,54 @@
 include_once 'sys/settings.php';
 session_start();
 
-if (isset($_POST['user']) && isset($_POST['password']) or $_SESSION['authorizedsids'][$_COOKIE['sid']] =="authorised")
+ if(isset($_GET['logout'])) 
+  {
+      unset($_SESSION['auth']);
+      setcookie("sid", "", time() - 3600);
+	  setcookie(session_name(), "", time() - 3600);
+      header("Location: http://".$_SERVER['HTTP_HOST']."/auth.php");
+      exit; 
+  }
+
+if (!empty($_POST))
 {
-    if ($_POST['user']==$login && $_POST['password']==$password)
-    {
-        header("Location: http://".$_SERVER['HTTP_HOST']."/");
-        $_SESSION['ssid']=session_id();
-        $hash=generateCode($length=16);
-        $_SESSION['authorizedsids'][$hash]="authorised";
-        setcookie('sid',$hash);
-        exit();
-    }
+	$login = mysql_real_escape_string($_POST['user']);
+    $query = mysql_query("SELECT `password` FROM `users` WHERE `login` = '{$login}' LIMIT 1");
+	
+	if(mysql_num_rows($query) > 0)
+	{
+        $user = mysql_fetch_assoc($query);
+	
+        if($user['password'] == md5($_POST['pass']))
+        {
+		     $dbTime = mysql_query("SELECT `last_login` FROM `users` WHERE `login` = '{$login}'");
+		     $time = mysql_fetch_assoc($dbTime);
+		
+		     setcookie('lastTimeAuth', $time['last_login'], time() + 60*60*24*30);
+		
+             $hash = generateCode(16);
+		
+		     setcookie('sid', $hash);
+		
+             $_SESSION['auth'][$hash] = 'authorised';
+		
+		     mysql_query("UPDATE `users` SET `user_sid` = '".session_id()."' WHERE `login` = '{$login}'");
+		
+		     header("Location: http://".$_SERVER['HTTP_HOST']."/");
+             exit;
+        }
+	}
+	else
+	{
+		header("Location: http://".$_SERVER['HTTP_HOST']."/auth.php?logout");
+        exit; 
+	}
 }
 
-if (isset($_GET['action']) and $_GET['action']=="logout") {
-    session_start();
-    $_SESSION['authorizedsids']="";
-    session_destroy();
-    setcookie ("sid", "", time() - 3600);
-    header("Location: http://".$_SERVER['HTTP_HOST']."/auth.php");
-    exit();
-    
-}
 
-
-
-if (!isset($_SESSION['authorizedsids'][$_COOKIE['sid']]) or !isset($_COOKIE['sid']) or $_SESSION['authorizedsids'][$_COOKIE['sid']] != "authorised") {
+if (!isset($_SESSION['auth'][$_COOKIE['sid']]) or !isset($_COOKIE['sid']) or $_SESSION['auth'][$_COOKIE['sid']] != "authorised") {
     echo file_get_contents("loginform.html");
-    exit();
+    exit;
 }
 
 
