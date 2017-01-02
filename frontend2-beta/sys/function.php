@@ -57,9 +57,11 @@ function readLog($num=1)
 	$echer = explode("\n",$echer);
 	$echer = array_reverse($echer);
 	$total = count($echer)-1;
-
+    
     if($num > $total) $num = $total;
 	if($num <= 1) return '<div class="logger">'.$echer[1].'</div>';
+	
+	$res = '';
 	
     for($i = 1; $i <= $num; $i++)
 	   {
