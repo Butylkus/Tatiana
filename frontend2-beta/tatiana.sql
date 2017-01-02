@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: localhost
--- Время создания: Янв 02 2017 г., 12:58
--- Версия сервера: 5.5.53-0+deb8u1
--- Версия PHP: 5.6.29-0+deb8u1
+-- Время создания: Янв 03 2017 г., 01:01
+-- Версия сервера: 5.5.45
+-- Версия PHP: 5.6.23
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -50,11 +50,11 @@ CREATE TABLE `pins` (
 
 INSERT INTO `pins` (`pin`, `name`, `direction`, `status`) VALUES
 (1, 'Главный рубильник', 'input', 0),
-(2, 'Ёлка', 'output', 1),
+(2, 'Ёлка', 'output', 0),
 (3, '', 'none', 1),
 (4, '', 'none', 1),
 (5, '', 'none', 1),
-(6, 'Туалет', 'output', 0),
+(6, 'Туалет', 'output', 1),
 (7, '', 'none', 1),
 (8, '', 'none', 1),
 (9, '', 'none', 1),
@@ -62,9 +62,9 @@ INSERT INTO `pins` (`pin`, `name`, `direction`, `status`) VALUES
 (11, '', 'none', 1),
 (12, '', 'none', 1),
 (13, 'Ванная', 'output', 0),
-(14, 'Спальня', 'output', 0),
-(15, 'Коридор', 'output', 0),
-(16, 'Прихожая', 'output', 0),
+(14, 'Спальня', 'output', 1),
+(15, 'Коридор', 'output', 1),
+(16, 'Прихожая', 'output', 1),
 (17, '', 'none', 1),
 (18, '', 'none', 1),
 (19, 'Зал', 'output', 1),
@@ -74,7 +74,7 @@ INSERT INTO `pins` (`pin`, `name`, `direction`, `status`) VALUES
 (23, '', 'none', 1),
 (24, '', 'none', 1),
 (25, '', 'none', 1),
-(26, 'Кухня', 'output', 1),
+(26, 'Кухня', 'output', 0),
 (27, '', 'none', 1);
 
 -- --------------------------------------------------------
@@ -107,10 +107,18 @@ INSERT INTO `plan` (`id`, `pin`, `ontime`, `offtime`, `calendar`) VALUES
 CREATE TABLE `users` (
   `user_id` tinyint(2) NOT NULL COMMENT 'номер пользователя',
   `login` varchar(10) COLLATE utf8_unicode_ci NOT NULL COMMENT 'логин',
-  `password` varchar(10) COLLATE utf8_unicode_ci NOT NULL COMMENT 'мд5 пароля',
+  `password` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'мд5 пароля',
   `username` varchar(30) COLLATE utf8_unicode_ci NOT NULL COMMENT 'нормальное имя (Вася)',
-  `last_login` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'последняя авторизация'
+  `last_login` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'последняя авторизация',
+  `user_sid` varchar(32) COLLATE utf8_unicode_ci DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Таблица пользователей: лоuины, пароли и тд';
+
+--
+-- Дамп данных таблицы `users`
+--
+
+INSERT INTO `users` (`user_id`, `login`, `password`, `username`, `last_login`, `user_sid`) VALUES
+(1, 'webTester', '827ccb0eea8a706c4c34a16891f84e7b', 'Саныч', '2017-01-02 21:26:26', 'v54mu2nih21f4pmder9cfpp403');
 
 --
 -- Индексы сохранённых таблиц
@@ -154,7 +162,7 @@ ALTER TABLE `plan`
 -- AUTO_INCREMENT для таблицы `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` tinyint(2) NOT NULL AUTO_INCREMENT COMMENT 'номер пользователя';
+  MODIFY `user_id` tinyint(2) NOT NULL AUTO_INCREMENT COMMENT 'номер пользователя', AUTO_INCREMENT=2;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
