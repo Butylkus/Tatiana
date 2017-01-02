@@ -1,8 +1,9 @@
 <?php
-
-#Логин и пароль для авторизации
-$login="user";
-$password="password";
+//Подключение к базе данных
+//Да Татьяна теперь у нас крутая!:)
+$db = @mysql_pconnect("localhost","tatiana","tatiana") or die("Не могу подключится к серверу БД"); 
+@mysql_select_db('tatiana',$db) or die("Не могу подключится к базе");
+@mysql_set_charset("utf8", $db);
 
 #Массив инициализации. Каждому пину должно соответствовать название, которое будет отображено в веб-интерфейсе
 
@@ -22,11 +23,7 @@ $pin_name[27] = 'Двадцать седьмой';
 
 $input_pin[1] = 'Главный рубильник';
 
-
-
-
 #Пути по умолчанию
-define("PLANFILE","/home/pi/tatiana/plans/plan.txt");     #файл плана включения и выключения
-define("LOGFILE","/home/pi/tatiana/commonlog.txt"); #файл общего лога работы
-define("STATUSES","/home/pi/tatiana/status/"); #путь к файлам статусов
+define("PLANFILE","plan.txt");     #файл плана включения и выключения
+define("LOGFILE","commonlog.txt"); #файл общего лога работы
 ?> 
