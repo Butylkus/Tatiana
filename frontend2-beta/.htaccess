@@ -1,0 +1,23 @@
+php_value display_errors 0
+
+php_flag display_errors 0
+
+php_value session.name SID
+
+php_value default_charset utf-8
+
+php_value session.use_cookies 1
+
+php_value session.use_trans_sid 0
+
+php_value session.cookie_lifetime 3600
+
+php_value session.gc_probability 100
+
+php_value session.gc_maxlifetime 3600
+
+php_value session.gc_divisor 10
+
+php_flag magic_quotes_gpc Off
+
+php_flag register_globals Off

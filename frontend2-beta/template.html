@@ -20,6 +20,8 @@
 						<div id="logo">
 							<!-- Инфа -->
 							<h1 id="title">Татьяна %IS TATIANA.PY RUNNING%</h1>
+							<p>Приветствую тебя, <strong>%USERAUTH%</strong>!</p>
+							<p>Ты заходил в последний раз: <span id="lastTimeAuth">%LASTAUTH%</span></p> 
 							<p>Сейчас: %MENUDATE%</p>
 							<p>За окном: <strong>%OUTTEMP%&deg;C</strong> и <strong>%OUTHUMIDITY%%</strong> влажности</p>
 							<p>Дома: <strong>%INTEMP%&deg;C</strong> и <strong>%INHUMIDITY%%</strong> влажности</p>
@@ -31,7 +33,7 @@
 								<li><a href="#main" id="top-link" class="skel-layers-ignoreHref"><span class="icon fa-home">Управление</span></a></li>
 								<li><a href="#plan" id="portfolio-link" class="skel-layers-ignoreHref"><span class="icon fa-clock-o">Планирование</span></a></li>
 								<li><a href="#log" id="about-link" class="skel-layers-ignoreHref"><span class="icon fa-eye">События</span></a></li>
-								<li><a href="#service" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-linux">Информация</span></a></li>
+								<li><a href="#service" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-linux">Сервис</span></a></li>
 								<li><a href="%LOGOUT%" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-sign-out">Выход</span></a></li>
 							</ul>
 						</nav>
@@ -82,7 +84,7 @@
 								<h2>Планирование</h2>
 							</header>
 
-							<p>Здесь будет хитрож...ёлтая система планирования событий. Пока хз как именно, но уж точно лучше старой!</p>
+							<p>Здесь будет хитрожопая система вывода плана и форма редактирования. Пока хз как именно, но уж точно лучше старой!</p>
                             <p>Вот список дел на сегодня. И на завтра...</p>
                             <center>
                             <table class="default">
@@ -105,11 +107,15 @@
 
 							<header>
 								<h2>Что творилось в доме</h2>
-								<p>Вот последние три десятка событий, которые записала бдительная Татьяна. Если произойдёт что-то ещё, она сразу же сообщит!</p>
+								<p>Последние ХХХ событий (настраиваемо - фича в наличии уже, можно даже гетом добавить, кстати...)</p>
 							</header>
-							
-							<div id="log_list" class="loglist">Одну секунду, вспоминаю...</div>
 
+
+
+							<p>Собственно, тут прямой вывод лога в человекопонятном виде: имж КАК текст ЧТО КОГДА.</p>
+
+							<div id="log_list">Секундочку! Я думаю...</div>
+							
 							<footer>
 								<a href="#main" class="button scrolly">Назад к управлению</a>
 							</footer>
@@ -123,13 +129,11 @@
 						<div class="container">
 
 							<header>
-								<h2>Информация о состоянии системы</h2>
+								<h2>Обслуживание системы</h2>
 							</header>
 
-							<p>Татьяна проснулась <strong>%UPTIME%</strong></p>
-							<p>Татьяна %IS TATIANA.PY RUNNING%</p>
-							<p>Татьяне %CPUTEMP%</p>
-							<p>Не обижайте Татьяну! :-P</p>
+							<p>Старт системы: <strong>%UPTIME%</strong></p>
+							<p>Татьяна в дереве процессов: %IS TATIANA.PY RUNNING%</p>
 
 
 						</div>
@@ -139,8 +143,9 @@
 
 		<!-- Footer -->
 			<div id="footer">
-                <p>Разработано: Алексей Бутылкус, Александр Шнуров и другие<br />
+                <p>Разработано: Бутылкус и компания<br />
                 Распространяется по законам GPL<br />
+                Авторы не несут ответственности за любые последствия результатов работы программно-аппаратного комплекса "Татьяна - умная домохозяйка" или отдельных их компонентов!
                 </p>
 			</div>
 
