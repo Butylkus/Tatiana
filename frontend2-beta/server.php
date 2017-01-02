@@ -1,46 +1,48 @@
 <?php
+session_start();
+
+ if($_SESSION['auth'][$_COOKIE['sid']] != "authorised"){
+	 
+    exit('{"error": 1, "info":"Ты не авторизован! Тебе сюда нельзя!"}');
+ }
+ 
 include_once 'sys/settings.php';
 include_once 'sys/function.php';
 
 switch($_POST['act'])
 {
 case'is_change_log':
-
-    print date('H:i:s',filemtime(LOGFILE));
+    
+    print '{"error" : 0, "lastTimeUpdate" : "'.date('H:i:s',filemtime(LOGFILE)).'"}';
 
 break;
 case'log_query':
 
-   print readLog(30,$pin_name);
+   print readLog(30);
    
 break;
 case "status_check":
 
 //Данная часть код отвечает за проверку статусов.
-//В зависимости от содержимого файла(0 или 1) выставяется цвет кнопок
+//В зависимости от значения статуса(0 или 1) выставяется цвет кнопок
 
 $res = array(
 "dev" => array()
 );
 
-	//Проходим циклом по массиву который находится в файле settings.php
-	
-	foreach($pin_name as $key => $devName)
+  $data =  mysql_query("SELECT * FROM `pins` WHERE `direction` = 'output' ORDER BY `pin` ASC");
+  
+	while($row = mysql_fetch_assoc($data))
 	{  
-	
-	    //Считываем содержмое файла для того, что бы корректно задать кнопкам цвета согласно статусу
+		//Если в статусе содержится число 0 генерируем красную кнопку в противном случаи зелёную
 		
-	    $p = file_get_contents(STATUSES.$key);
-		
-		//Если в файле содержится число 0 генерируем красную кнопку в противном случаи зелёную
-		
-		if($p == 1)
+		if($row['status'] == 0)
 	    { 
 	
 		   array_push($res['dev'], array(
-		   "pinNum" =>$key,
+		   "pinNum" =>$row['pin'],
 		   "status" =>0,
-		   "deviceName" => $devName
+		   "deviceName" => $row['name']
 		   ));
 		 
 		}
@@ -48,9 +50,9 @@ $res = array(
 		{
 			
 		   array_push($res['dev'], array(
-		   "pinNum" =>$key,
+		   "pinNum" =>$row['pin'],
 		   "status" =>1,
-		   "deviceName" => $devName
+		   "deviceName" => $row['name']
 		   ));
 		 
 		}
@@ -64,48 +66,45 @@ case'switch_button':
 
 //Защита от тех кто считает себя умнее других:)
 //Ну и походу инвертирование статуса. Так сказать совмещаем приятное с полезным:)
-//Если включено значить пишем в файл 0 если выключено то пишем 1
+//Если включено значить пишем в БД 0 если выключено то 1
 
    switch($status)
    {
-    case 1:
-            $status = 1;
-    break;
+      case 1:
+              $status = 0;
+      break;
 	
-    case 0:
-            $status = 0;
-    break;
+      case 0:
+              $status = 1;
+      break;
 
-   default: print '{"error":1,"info":"Ехай на хуй отсюда"}';
-}
+      default: exit('{"error" : 1, "info" : "Ехай на хуй отсюда"}');
+   }
+   	
+//Проверяем существует ли пин если нет генерируем ошибку
+    $disc = @mysql_query("SELECT `status` FROM `pins` WHERE `pin` = '{$pin_num}'");
+	
+    if(mysql_num_rows($disc) < 1) 
+	exit('{"error" : 1, "info" : "Пин не существует"}');
 
-//Проверяем существует ли файл(пин) если нет генерируем ошибку
-//А то вдруг кому нибудь захочется создать зоопарк из файлов:)
-
-    if(!file_exists(STATUSES.$pin_num))
-	{
-      exit('{"error":"1,"info":"Пин не существует"}');
-    }
-
-//Открываем файл и пишем в него циферки	
-
-	  $fp = fopen(STATUSES.$pin_num,"w+");
-	  
-//Если по какой либо причине запись не удалась генерируем ошибку
-
-    if(fwrite($fp,$status) === false)
+//Если пин существует обновляем статус
+	
+    if(mysql_query("UPDATE `pins` SET `status` = '{$status}' WHERE `pin` = '{$pin_num}'"))
 	 {
-        exit('{"error":1,"info":"Ошибка записи в статус-файл"}');
-     }
-//Если запись в статус файл прошла успешно пишем это событие в лог
-//Для корректной работы кнопок ответ функции writelog необходимо выводить
+		 print '{"error" : 0, "pin" : '.$pin_num.', "status" : '.$status.'}';
+	 }
 
-	 print writelog($pin_num);
+     else 
+	  {
+		 print '{"error" : 1, "info" : "Статус не был обновлён! Ошибка: '.mysql_error().'"}';		 
+	  }
+	
+//Если статус успешно обновился пишем это событие в лог
 
-//После всех манипуляций файл нужно закрыть иначе будут проблемы:)
-fclose($fp);
+	 writelog($pin_num);
+	 
 break;
 default:
-print '{"error":1,"info":"Не корректный запрос"}';
+print '{"error" : 1, "info" : "Не корректный запрос"}';
 }
 ?>
