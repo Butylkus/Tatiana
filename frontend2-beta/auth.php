@@ -48,7 +48,7 @@ if (!empty($_POST))
 
 
 if (!isset($_SESSION['auth'][$_COOKIE['sid']]) or !isset($_COOKIE['sid']) or $_SESSION['auth'][$_COOKIE['sid']] != "authorised") {
-    echo file_get_contents("loginform.html");
+    echo file_get_contents("template/loginform.html");
     exit;
 }
 

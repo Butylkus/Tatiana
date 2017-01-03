@@ -2,7 +2,7 @@ $(document).ready(function()
 {
 
    var selectorName = '#buttons',
-       freqLog = 3000;
+       freqLog = 5666;
 
 /* Функция отрисовки кнопок */
 

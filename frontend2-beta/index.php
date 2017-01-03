@@ -14,7 +14,7 @@
 $userDB = mysql_query("SELECT `username` FROM `users` WHERE `user_sid` = '".session_id()."'");
 $userDB = mysql_fetch_assoc($userDB);
 
-$echoer = file_get_contents("template.html");
+$echoer = file_get_contents("template/template.html");
 $echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,PLANFILE)),$echoer);
 $echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),$echoer);
 $echoer = str_replace("%LOGOUT%",    logout(),                 $echoer);

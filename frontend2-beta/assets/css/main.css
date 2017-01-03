@@ -1,11 +1,6 @@
 @import url("font-awesome.min.css");
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300italic,400,600");
 
-/*
-	Prologue by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-*/
 
 /* Reset */
 
@@ -2579,7 +2574,7 @@
 
 	
 .logpicture {
-	width: 35px;
+	width: 27px;
 	vertical-align: middle;
 }	
 	
@@ -2587,7 +2582,7 @@
      font-size: 1em;
      margin:5px 5px 5px 5px;
      width: 30%;
-     padding: 0.75em 0.3em 0.75em 0.3em;
+     /*padding: 0.75em 0.3em 0.75em 0.3em;*/
 }
 
 .green {
@@ -2622,9 +2617,4 @@
 
 .logright {
     text-align: right;
-}
-
-#lastTimeAuth{
-     color: #cc3533;
-     font-weight: bold;
 }

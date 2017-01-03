@@ -33,11 +33,18 @@ function readLog($num=1)
 {
     $echer = file_get_contents(LOGFILE);
     $echer = str_replace(" ", "&nbsp;", $echer);
-    $rq = mysql_query("SELECT `pin`,`name` FROM `pins` WHERE `direction` = 'output' ORDER BY `pin` ASC");
+    $rq = mysql_query("SELECT `pin`,`name` FROM `pins` ORDER BY `pin` ASC");
 	
+
     while ($row = mysql_fetch_assoc($rq)) {
         $searchStr  = "%&nbsp;". $row['pin'] ."&nbsp;>";
         $replaceStr = "%&nbsp;". $row['name'] ."&nbsp;</div><div class='logright'>";
+        $echer = str_replace($searchStr, $replaceStr, $echer);
+        $searchStr  = "%&nbsp;". $row['pin'] ."&nbsp;+";
+        $replaceStr = "%&nbsp;". $row['name'] . "&nbsp;&#10040;";
+        $echer = str_replace($searchStr, $replaceStr, $echer);
+        $searchStr  = "&nbsp;". $row['pin'] ."&nbsp;>";
+        $replaceStr = "&nbsp;". $row['name'] . "&nbsp;</div><div class='logright'>";
         $echer = str_replace($searchStr, $replaceStr, $echer);
     }
 	   
@@ -48,8 +55,8 @@ function readLog($num=1)
     $echer = str_replace("%PLANOFF%", "<div class='logleft'><img src='images/logplanoff.png' class='logpicture' title='Запланированное выключение'>", $echer);
     $echer = str_replace("%BUTTONOFF%", "<div class='logleft'><img src='images/logbutoff.png' class='logpicture' title='Выключено нажатием на кнопку'>", $echer);
     $echer = str_replace("%BUTTONON%", "<div class='logleft'><img src='images/logbuton.png' class='logpicture' title='Включено нажатием на кнопку'>", $echer);
-    $echer = str_replace("%UP%&nbsp;>", "<div class='logleft'><img src='images/logsysup.png' class='logpicture' title='Я проснулась! =)'>За работу!</div><div class='logright'>", $echer);
-    $echer = str_replace("%DOWN%&nbsp;>", "<div class='logleft'><img src='images/logsysdown.png' class='logpicture' title='Я заснула...'>Татьяна отдыхает</div><div class='logright'>", $echer);
+    $echer = str_replace("%UP%&nbsp;>", "<div class='logleft'><img src='images/logsysup.png' class='logpicture' title='Я проснулась! =)'> За работу!</div><div class='logright'>", $echer);
+    $echer = str_replace("%DOWN%&nbsp;>", "<div class='logleft'><img src='images/logsysdown.png' class='logpicture' title='Я заснула...'> Татьяна отдыхает</div><div class='logright'>", $echer);
     $echer = str_replace("%IRON%", "<div class='logleft'><img src='images/logiron.png' class='logpicture' title='Включено пультом ДУ'>", $echer);
     $echer = str_replace("%IROFF%", "<div class='logleft'><img src='images/logiroff.png' class='logpicture' title='Выключено пультом ДУ'>", $echer);
     $echer = str_replace("\n", "</div>\n", $echer);
@@ -137,5 +144,6 @@ function pintoname($pin_name,$plan){
     }
     return $plan;
 }
+
 
 ?>
