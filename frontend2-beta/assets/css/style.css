@@ -16,6 +16,10 @@ body {
 
 }
 
+button {
+    outline: none;
+}
+
 #login-form {
 	background-color: #363636;
 	border-radius: 5px;
@@ -172,14 +176,6 @@ body {
         width: 100%;
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  
     
 }
