@@ -18,8 +18,8 @@ $echoer = file_get_contents("template/template.html");
 
 
 
-// Оп-па перл-стайл!
-$echoer = str_replace("%PLAN%", show_plan(pintoname($pin_name,PLANFILE)),  $echoer);
+//Вижуал такой вижуал
+$echoer = str_replace("%PLAN%",                  show_plan(),              $echoer);
 $echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),          $echoer);
 $echoer = str_replace("%LOGOUT%",                logout(),                 $echoer);
 $echoer = str_replace("%UPTIME%",                uptime(),                 $echoer);

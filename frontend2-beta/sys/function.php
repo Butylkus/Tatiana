@@ -79,7 +79,7 @@ function readLog($num=1)
 }
 
 
-//Функция logout хрен понять зачем, но Бутылкусу видней)
+//Модный генератор ссылки выхода. Ибо требуется для шаблонизации.
 
 function logout(){
     $logout = "http://".$_SERVER['HTTP_HOST']."/auth.php?logout";
@@ -87,13 +87,15 @@ function logout(){
 }
 
 
-
+//Аптайм ВСЕЙ системы
 function uptime(){
     return exec("uptime -s");
 }
 
 
-//Проверяем трудится Татьяна или шлангует))
+//Возвращает статус главного скрипта - есть ли в памяти.
+//TODO: при демонизации переписать на вывод баша или опрос через инит.
+//И вообще: изучить скелеты инита, ридми и воскурить баш как следует, ибо ЪТатьяна==Ъдемон и всё будет решаться через инит. Движение к неубиваемому процессу началось.
 
 function check_tatiana(){
     exec('ps ax | grep tatiana',$mainpid);
@@ -105,8 +107,7 @@ function check_tatiana(){
 }
 
 
-//Проверяем не жарко ли Татьяне. 
-//Женщины не любят резких температурных перепадов)
+//Возврат температуры ЦП  
 
 function cpu_temp(){
     $string = exec('cat /sys/class/thermal/thermal_zone0/temp');
@@ -120,29 +121,49 @@ function cpu_temp(){
 }
 
 
-//Функции планироващика
+//Показывает план из базы с готовыми кнопками удаления.
+function show_plan(){
+    $plan = array();
+    $query = mysql_query("SELECT * FROM `plan`");
+    while ($string = mysql_fetch_assoc($query)) {
+        array_push($plan, array(
+           "id"       => $string['id'],
+           "pin"      => $string['pin'],
+           "ontime"   => $string['ontime'],
+           "offtime"  => $string['offtime'],
+           "calendar" => $string['calendar']
+        ));
 
-function show_plan($plan){
-    #$echer=file_get_contents($plan);
-    $echer = "\n".$plan;
-    $echer = str_replace("\n", "%LINEEND%", $echer);
-    $echer = str_replace(">", "%ONTIME%", $echer);
-    $echer = str_replace("<", "%OFFTIME%", $echer);
-    $echer = str_replace("%LINEEND%", "</tr>\n<tr>\n<td>", $echer);
-    $echer = str_replace("%ONTIME%", "</td>\n<td class='onplan'>", $echer);
-    $echer = str_replace("%OFFTIME%", "</td>\n<td class='offplan'>", $echer);
-    $echer = str_replace("%NEWLINE%", "</td>\n</tr>", $echer);
-    return $echer;
+    }
+    
+    $string = "<div class=\"planblock\" id=\"plan\">\n";
+    foreach ($plan as $row){
+        if ($row['calendar'] == 1){$row['calendar'] = "Пн-Пт";}
+        elseif ($row['calendar'] == 2){$row['calendar'] = "Сб-Вс";}
+        else {$row['calendar'] = "Пн-Вс";}
+        $string = $string . 
+            "<div class='planrow' id ='".$row['id'] . "'>\n" .
+                "<div class='pinname'>" . pin_to_name($row['pin']) . "</div>\n" . 
+                "<div class='ontime'>" . $row['ontime'] . "</div>\n" . 
+                "<div class='offtime'>" . $row['offtime'] . "</div>\n" . 
+                "<div class='calendar'>" . $row['calendar'] . "</div>\n" . 
+                "</div>\n";
+    }
+    $string = $string . "</div>\n";
+
+    
+    
+return $string;
 }
 
 
 
-function pintoname($pin_name,$plan){
-    $plan = file_get_contents($plan);
-    foreach ($pin_name as $pin=>$name){
-        $plan = str_replace($pin.">", $name.">", $plan);
-    }
-    return $plan;
+//Самая нужная в мире функция, странно, что последняя в списке.
+//Прнимает номер пина, возвращает его название.
+function pin_to_name($pin){
+    $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='".$pin."'");
+    $pin_name = mysql_fetch_assoc($query);
+    return $pin_name['name'];
 }
 
 
