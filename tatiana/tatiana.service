@@ -1,0 +1,10 @@
+[Unit]
+Description=Smart home control system main script
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/tatiana/tatiana.py
+
+[Install]
+WantedBy=multi-user.target

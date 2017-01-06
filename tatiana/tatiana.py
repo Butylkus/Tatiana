@@ -1,210 +1,194 @@
-#!/usr/bin/python3.4
+#!/usr/bin/python3
 #coding=utf-8
-#
-#
-#
-# НАСТРОЙКА ПОД СЕБЯ:
-# 1. Убедитесь, что существуют и имеют соответствующие права каталоги по умлочанию. Или пропишите свой дефолтный путь (в блоке НАСТРОЙКИ: default_path)
-# 2. Пропишите все используемые вами порты GPIO на ввод и вывод 
-# 3. Дублируйте нужные функции в блоке ГЛАВНЫЙ ЦИКЛ с нужными вам параметрами (какая кнопка какое устройство включает, по какому плану должны работать определённые устройства)
-# 4. Автозапуск описан в README
-# 5*. Желательно также заранее создать просто пустые статус-файлы по пути %default_path%/status/XX, где ХХ номера используемых пинов вывода. Можно создать просто подряд с 1 по 27.
-#
+#Скрипт для подписчиков канала http://www.youtube.com/user/butylkus
+#Лицензия GPL
+#Автор: Алексей Butylkus, https://vk.com/butpub
 
-
-version = "0.6.1-1b" 
+# ========= Импортируем модули, настраиваем их ========= #
 
 import time
 from datetime import datetime
+import pymysql as MYSQL #используем более короткий синоним, ибо нех
 import RPi.GPIO as GPIO
 import os, sys
 GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM) #Почему-то только в этом режиме
+GPIO.setmode(GPIO.BCM) 
 
-# ------------- НАСТРОЙКИ ----------------
-
-#ВЫХОДНЫЕ контакты (управление реле)
-#для моей схемы подключения модуля из 8 реле и 1 диода.
-GPIO.setup(2, GPIO.OUT)
-GPIO.setup(3, GPIO.OUT)
-GPIO.setup(4, GPIO.OUT)
-GPIO.setup(14, GPIO.OUT)
-GPIO.setup(15, GPIO.OUT)
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(18, GPIO.OUT)
-GPIO.setup(27, GPIO.OUT)
-GPIO.setup(22, GPIO.OUT)
+version = "0.7.0-0a"
+logpath = "/home/pi/tatiana/commonlog.txt"
 
 
-GPIO.output(2, 1)
-GPIO.output(3, 1)
-GPIO.output(4, 1)
-GPIO.output(14, 1)
-GPIO.output(17, 1)
-GPIO.output(18, 1)
-GPIO.output(15, 1)
-GPIO.output(22, 1)
-GPIO.output(27, 1)
 
 
-#ВХОДНЫЕ контакты (кнопки-выключатели)
-GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_UP) #Строго подтяжка! Все кнопки В ЗЕМЛЮ. В случае желания переписать на стяжку, изменить условие функции button() на True
+# ========= Настраиваем пины согласно базе данных ========= #
+# ========= ВАЖНО ========= #
+# При перенастройке системы её НЕОБХОДИМО перезапустить!
+# Настройки нельзя переопределить на лету, они НЕ вступят в силу до перезапуска данной программы.
 
-#Базовый путь к статусам и планам. СОЗДАТЬ РУКАМИ при первом запуске! Добавить подкаталоги status и plans, дать права 777 рекурсивно.
-default_path = "/home/pi/tatiana/"
+connection = MYSQL.connect(host='localhost', database='tatiana', user='tatiana', password='tatiana')
+cursor = connection.cursor()
+
+#Выходные пины (управляемые)
+query = "SELECT pin FROM `pins` WHERE `direction`='output'"
+cursor.execute(query)
+outpins = cursor.fetchall()
+for pin in outpins:
+    GPIO.setup(int(pin[0]), GPIO.OUT)
+
+#Входные пины (управляющие) - кнопки и тд
+query = "SELECT pin FROM `pins` WHERE `direction`='input'"
+cursor.execute(query)
+inpins = cursor.fetchall()
+for pin in inpins:
+    GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+cursor.close()
+connection.close()
 
 
-# ------------- ФУНКЦИИ ----------------
+ThisMoment = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")
 
-# Функция планировщика. Вклюаети выключает устройства согласно заданному плану.
-# Формат плана:
-# PIN>ONTIME<OFFTIME\n
-# 10>чч:мм:сс<чч:мм:сс\n
-# %NEWLINE%
-# Файл обязательно должен заканчиваться строкой %NEWLINE% (без конечного \n) - это необходимо для работы веб-интерфейса!
-# Вообще лучше не трогать этот файл руками, а пользоваться только веб-интерфейсом.
 
-def plan(planfile=default_path + "plans/plan.txt", statusfile=default_path + "status/", logfile=default_path + "commonlog.txt"):
-    planfile = open(planfile, "r")
-    #print("Дескриптор:\n", planfile, "\n\n") #дебаг при ручном запуске
-    fullplan = planfile.read()
-    #print("Содержимое плана:\n", fullplan, "\n\n") #дебаг при ручном запуске
-    planstrings = fullplan.split("\n")
-    #print("Построчно:\n", planstrings, "\n\n") #дебаг при ручном запуске
-    index = len(planstrings)
+
+# ========= Главные функции ========= #
+
+### Проверяет и включает-выключает устройства согласно записям в БД
+def device(cursor, logfile=logpath):
+    query = "SELECT pin, status FROM `pins` WHERE `direction`='output'"
+    cursor.execute(query)
+    string = cursor.fetchall()
+    for pairs in string:
+        GPIO.output(int(pairs[0]), pairs[1])
+
+
+
+### Обработчик плана. Обновляет статусы при наступлении запланированного момента
+
+def check_plan(cursor, logfile=logpath):
+    query = "SELECT pin, ontime, offtime, calendar FROM `plan`"
+    cursor.execute(query)
+    planarray = cursor.fetchall()
+    ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
+    for moment in planarray:
+        
+#Проверяем календарь: 1 = только по будням, 2 = только по выходным, 3 = ежедневно
+        operable = False
+        if moment[3] == 1 and (datetime.isoweekday(datetime.now()) <= 5):
+            operable = True
+        elif moment[3] == 2 and (datetime.isoweekday(datetime.now()) >= 6):
+            operable = True
+        elif moment[3] == 3:
+            operable = True
+        else:
+            operable = False
+        
+        if operable == True:
+            pin = moment[0]
+            ontime = moment[1]
+            offtime = moment[2]
+
+#Если настал момент включения/выключения, то пишем в базу соответствующую пару пин-статус, а также делаем запись в логе
+            f = open(logfile, "a")
+            if ThisMoment == ontime:
+                query = "UPDATE `pins` SET `status`=1 WHERE `pin`='" + str(pin) + "'"
+                f.write("%PLANON% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
+            if ThisMoment == offtime:
+                query = "UPDATE `pins` SET `status`=0 WHERE `pin`='" + str(pin) + "'"
+                f.write("%PLANOFF% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
+            f.close()
+            cursor.execute(query)
+            connection.commit()
+
+
+
+
+### Обработчик кнопок. Обновляет статус при нажатии на кнопку согласно привязкам в БД
+
+def check_button(inpins=inpins, cursor=cursor, logfile=logpath):
     
-        
-    for stringnumber in range(0,index-1):
-        pins = planstrings[stringnumber].split(">")
-        # Получаем время включения и выключения
-        times = pins[1].split("<")
-        pin = pins[0] #это номер пина
-        ontime = times[0] #Время включения
-        offtime = times[1] #Время выключения
-        moment = datetime.strftime(datetime.now(), "%H:%M:%S")
-        
-        #Проверяем время включения, пишем статус при совпадении, включаем девайс
-        if moment == ontime :
-            f = open(statusfile+pin, "w")
-            f.write("0")
-            f.close()
-            device(int(pin))
-            f = open(logfile, "a")
-            f.write("%PLANON% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
-            f.close()
-            while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
-                continue
-        if moment == offtime :
-            f = open(statusfile+pin, "w")
-            f.write("1")
-            f.close()
-            device(int(pin))
-            f = open(logfile, "a")
-            f.write("%PLANOFF% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
-            f.close()
-            while moment == datetime.strftime(datetime.now(), "%H:%M:%S"):
-                continue
+    #"Слушаем" все входные кнопки из таблицы привязок
+    for pin in inpins:
+        moment = "" #инициализируем временную отсечку
 
-#Главная функция. Включает и отключает согласно статусу из соответствующего пину файла
-def device(pin):
-    f_reader = default_path + "status/"+str(pin) #Цепляем правильный файл
-    f = open(f_reader,"r") #читаем статус-файл пина
-    try: 
-        status = int(f.read())
-    except ValueError:
-        f.close()
-        time.sleep(0.05)
-        f = open(f_reader,"r")
-        status = int(f.read())
-        GPIO.output(pin, status) #Выключаем/выключаем устройство
-    else:
-        GPIO.output(pin, status) #Выключаем/выключаем устройство
-    finally:
-        f.close()
+        #Если кнопка нажата
+        if GPIO.input(int(pin[0])) == False:
 
+            #узнаём привязанный выходной пин
+            query = "SELECT outpin FROM `button_device` WHERE `inpin`='"+str(pin[0])+"'"
+            cursor.execute(query)
+            outarray = cursor.fetchone() #Только один!
 
-#Детектор кнопок
-#Принимает пин кнопки и передаёт на реле инвертированный статус по логике:
-#Если кнопка нажата и реле выключено, то включить. Если нажата и реле включено - отключить
-def button(pin_in, pin_out, logfile=default_path + "commonlog.txt"):
-    if GPIO.input(pin_in) == False:
-        f = ""
-        #Сверяем и переключаем статус выходного устройства
-        path = default_path + "status/"+str(pin_out)
-        try:
-            f = open(path, "r")
-            status = f.read()
-            f.close()
-        except FileNotFoundError:
-            f = open(path, "w")
-            status = f.write("1")
-            f.close()
-            status="0"
-        finally:
-            f = open(path, "w")
+            #Узнаём текущий статус искомого выходного пина
+            query = "SELECT status FROM `pins` WHERE `pin`='"+str(outarray[0])+"'"
+            cursor.execute(query)
+            status = cursor.fetchone()
+            
+            #Предформирование строки лога
+            logquery = str(pin[0]) + " + " + str(outarray[0]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+            if status[0] == 1:
+                logquery ="%BUTTONOFF% " + logquery #Доформируем строку лога
+                status = 0
+            elif status[0] == 0:
+                logquery ="%BUTTONON% " + logquery #Доформируем строку лога
+                status = 1
+            #Обновляем статус для привязанного выходного пина
+            query = "UPDATE `pins` SET `status`='" + str(status) + "' WHERE `pin`='" + str(outarray[0]) + "'"
+            cursor.execute(query)
+            connection.commit()
+            #Пишем лог
             lfile = open(logfile, "a")
-#            print (status) #Дебаг, отлов нажатия
-            if status == "0":
-                f.write("1")
-#                print ("теперь 1")
-                lfile.write("%BUTTONOFF% " + str(pin_in) + " > " + str(pin_out) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
-#                print ("записано")
-            if status == "1":
-                f.write("0")
-#                print ("теперь 0") #Дебаг, отлов нажатия
-                lfile.write("%BUTTONON% " + str(pin_in) + " > " + str(pin_out) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
-#                print ("записано")
-        f.close()
-        lfile.close()
-        os.system("sync")
-        device(pin_out)
-        moment = datetime.strftime(datetime.now(), "%H%M%S")
-        while moment == datetime.strftime(datetime.now(), "%H%M%S"):
-            continue
+            lfile.write(logquery)
+            lfile.close()
+            #Засекаем момент момент нажатия и игнорим его до конца секунды
+            moment = datetime.strftime(datetime.now(), "%H%M%S")
+    while moment == datetime.strftime(datetime.now(), "%H%M%S"):
+        continue
 
 
 
-    
-    
-    
-    
-    
-    
-    
-    
 
-# ------------- ИСПОЛНЕНИЕ ----------------
 
-f = open(default_path + "commonlog.txt", "a")
-f.write("%UP% > "  + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+# ========= Главная программа ========= #
+
+# Пишем в лог время старта скрипта
+f = open(logpath, "a")
+f.write("%UP% > " + str(ThisMoment) + " \n")
 f.close()
 
-# ------------- ГЛАВНЫЙ ЦИКЛ ----------------
-
+# Главный вечный цикл
 while True:
-    time.sleep(0.11) #Слегка снижает нагрузку на процессор, сокращая активность до 9-10 проходов в секунду
-    
-    #Проверяем файл плана и если время для какой-либо операции пришло, функция выполнит нужную операцию
-    plan()
-    
-    #Привязываем кнопку к устройству. Одна кнопка может управлять любыми устройствами. И наоборот, любое устройство может управляться любой кнопкой.
-    #КАЖДАЯ кнопка должна быть привязана к устройству, для этого просто дублируем функцию с нужными параметрами
-    button(21, 17) #По сигналу кнопки (пин 21) управляется устройство (27 пин), пишется лог работы кнопки
-    
-    #Активация веб-интерфейса. Дублируем для каждого устройства, управляемого через веб-интерфейс
-    device(2)
-    device(3)
-    device(4)
-    device(14)
-    device(15)
-    device(17)
-    device(18)
-    device(22)
-    device(27)
-    
-# ------------- ВЫХОД ----------------
 
-#Прибираемся при перезагрузке/рестарте
+# Подключаемся к БД
+    connection = MYSQL.connect(host='localhost', database='tatiana', user='tatiana', password='tatiana')
+    cursor = connection.cursor()
+
+# Ловим нажатие кнопок
+    check_button(inpins, cursor, logpath)
+
+# Проверяем статусы и обрабатываем их
+    device(cursor, logpath)
+
+    cursor.close()
+    connection.close()
+    os.system("sync")
+    
+    time.sleep(0.05)
+
+# Планировщик срабатывает только один раз в секунду, больше нам и не надо.
+    if ThisMoment != datetime.strftime(datetime.now(), "%H:%M:%S"):
+        connection = MYSQL.connect(host='localhost', database='tatiana', user='tatiana', password='tatiana')
+        cursor = connection.cursor()
+        ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
+#        print (str(ThisMoment))
+        check_plan(cursor, logpath)
+        cursor.close()
+        connection.close()
+    else:
+        continue
+
+
+# ========= Прибираемся при выходе ========= #
+
 GPIO.cleanup() 
 f = open(default_path + "commonlog.txt", "a")
 f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
