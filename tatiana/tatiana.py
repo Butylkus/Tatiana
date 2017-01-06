@@ -16,8 +16,10 @@ GPIO.setmode(GPIO.BCM)
 
 version = "0.7.0-0a"
 logpath = "/home/pi/tatiana/commonlog.txt"
-
-
+dbhost = 'localhost'
+dbbase='tatiana'
+dbuser='tatiana'
+dbpassword='tatiana'
 
 
 # ========= Настраиваем пины согласно базе данных ========= #
@@ -25,7 +27,7 @@ logpath = "/home/pi/tatiana/commonlog.txt"
 # При перенастройке системы её НЕОБХОДИМО перезапустить!
 # Настройки нельзя переопределить на лету, они НЕ вступят в силу до перезапуска данной программы.
 
-connection = MYSQL.connect(host='localhost', database='tatiana', user='tatiana', password='tatiana')
+connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
 cursor = connection.cursor()
 
 #Выходные пины (управляемые)
@@ -159,7 +161,7 @@ f.close()
 while True:
 
 # Подключаемся к БД
-    connection = MYSQL.connect(host='localhost', database='tatiana', user='tatiana', password='tatiana')
+    connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
     cursor = connection.cursor()
 
 # Ловим нажатие кнопок
