@@ -26,8 +26,9 @@
 
 Подготовка к установке
 ----
-Для работы Татьяны необходимы MySQL, Python 3+ и модуль PyMySQL:
-    1. sudo apt-get install mysql-server python3 python3-pip
+Для работы Татьяны необходимы MySQL, Python 3+ и модуль PyMySQL:  
+
+    1. sudo apt-get install mysql-server python3 python3-pip  
     2. sudo pip3 install PyMySQL
 
 Создайте базу данных с названием tatiana, а также пользователя tatiana и паролем tatiana, предоставив этому пользователю базовый доступ. Разумеется, можно менять по своему усмотрению, не забыв прописать соответствующие значения в скрипте tatiana.py.
@@ -38,15 +39,19 @@
 Установка и настройка главного скрипта
 ----
 Для установки необходимо сделать несколько простых шагов. Приведён пример для путей по умолчанию, их можно менять по своему усмотрению - просто не забудьте изменить настройки в скрипте (logpath = )
+
     1. mkdir /home/pi/tatiana
     2. chown -R pi:pi /home/pi/tatiana
+
 Загружаем сюда скрипт и лог. Не забудьте сделать скрипт исполняемым (chmod +x tatiana.py).
 
-Скрипт можно добавить в rc.local, но правильным решением будет перевод в режим демона:
-    3. sudo cp /home/pi/tatiana/tatiana.service /lib/systemd/system/tatiana.service
-    4. sudo chmod 644 /lib/systemd/system/tatiana.service
-    5. sudo systemctl daemon-reload
-    6. sudo systemctl enable tatiana.service
+Скрипт можно добавить в rc.local, но правильным решением будет перевод в режим демона:  
+
+    3. sudo cp /home/pi/tatiana/tatiana.service /lib/systemd/system/tatiana.service  
+    4. sudo chmod 644 /lib/systemd/system/tatiana.service  
+    5. sudo systemctl daemon-reload  
+    6. sudo systemctl enable tatiana.service  
+
 Теперь Татьяна будет работать как демон. Во всех смыслах =)
 
 Скрипт работает с базой данных, поэтому вся настройка системы происходит через неё. В будущем будет добавлен конфигуратор.
