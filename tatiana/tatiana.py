@@ -14,7 +14,7 @@ import os, sys
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
 
-version = "0.7.0-0a"
+version = "0.7.0-1a"
 logpath = "/home/pi/tatiana/commonlog.txt"
 dbhost = 'localhost'
 dbbase='tatiana'
@@ -43,6 +43,7 @@ cursor.execute(query)
 inpins = cursor.fetchall()
 for pin in inpins:
     GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=200)
 
 cursor.close()
 connection.close()
@@ -106,45 +107,32 @@ def check_plan(cursor, logfile=logpath):
 
 ### Обработчик кнопок. Обновляет статус при нажатии на кнопку согласно привязкам в БД
 
-def check_button(inpins=inpins, cursor=cursor, logfile=logpath):
-    
-    #"Слушаем" все входные кнопки из таблицы привязок
-    for pin in inpins:
-        moment = "" #инициализируем временную отсечку
+def button(inpin, cursor=cursor, logfile=logpath):
+    #узнаём привязанный выходной пин
+    query = "SELECT outpin FROM `button_device` WHERE `inpin`='"+str(inpin)+"'"
+    cursor.execute(query)
+    outarray = cursor.fetchone() #Только один!
+    #Узнаём текущий статус искомого выходного пина
+    query = "SELECT status FROM `pins` WHERE `pin`='"+str(outarray[0])+"'"
+    cursor.execute(query)
+    status = cursor.fetchone()
+    #Предформирование строки лога
+    logquery = str(inpin) + " + " + str(outarray[0]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+    if status[0] == 1:
+        logquery ="%BUTTONOFF% " + logquery #Доформируем строку лога
+        status = 0
+    elif status[0] == 0:
+        logquery ="%BUTTONON% " + logquery #Доформируем строку лога
+        status = 1
+    #Обновляем статус для привязанного выходного пина
+    query = "UPDATE `pins` SET `status`='" + str(status) + "' WHERE `pin`='" + str(outarray[0]) + "'"
+    cursor.execute(query)
+    connection.commit()
+    #Пишем лог
+    lfile = open(logfile, "a")
+    lfile.write(logquery)
+    lfile.close()
 
-        #Если кнопка нажата
-        if GPIO.input(int(pin[0])) == False:
-
-            #узнаём привязанный выходной пин
-            query = "SELECT outpin FROM `button_device` WHERE `inpin`='"+str(pin[0])+"'"
-            cursor.execute(query)
-            outarray = cursor.fetchone() #Только один!
-
-            #Узнаём текущий статус искомого выходного пина
-            query = "SELECT status FROM `pins` WHERE `pin`='"+str(outarray[0])+"'"
-            cursor.execute(query)
-            status = cursor.fetchone()
-            
-            #Предформирование строки лога
-            logquery = str(pin[0]) + " + " + str(outarray[0]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
-            if status[0] == 1:
-                logquery ="%BUTTONOFF% " + logquery #Доформируем строку лога
-                status = 0
-            elif status[0] == 0:
-                logquery ="%BUTTONON% " + logquery #Доформируем строку лога
-                status = 1
-            #Обновляем статус для привязанного выходного пина
-            query = "UPDATE `pins` SET `status`='" + str(status) + "' WHERE `pin`='" + str(outarray[0]) + "'"
-            cursor.execute(query)
-            connection.commit()
-            #Пишем лог
-            lfile = open(logfile, "a")
-            lfile.write(logquery)
-            lfile.close()
-            #Засекаем момент момент нажатия и игнорим его до конца секунды
-            moment = datetime.strftime(datetime.now(), "%H%M%S")
-    while moment == datetime.strftime(datetime.now(), "%H%M%S"):
-        continue
 
 
 
@@ -165,20 +153,23 @@ while True:
     cursor = connection.cursor()
 
 # Ловим нажатие кнопок
-    check_button(inpins, cursor, logpath)
+    for pin in inpins:
+        #Если кнопка нажата
+        if GPIO.event_detected(int(pin[0])):
+            button(pin[0], cursor)
 
 # Проверяем статусы и обрабатываем их
     device(cursor, logpath)
 
     cursor.close()
     connection.close()
-    os.system("sync")
+
     
     time.sleep(0.05)
 
 # Планировщик срабатывает только один раз в секунду, больше нам и не надо.
     if ThisMoment != datetime.strftime(datetime.now(), "%H:%M:%S"):
-        connection = MYSQL.connect(host='localhost', database='tatiana', user='tatiana', password='tatiana')
+        connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
         cursor = connection.cursor()
         ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
 #        print (str(ThisMoment))
