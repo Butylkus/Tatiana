@@ -17,7 +17,7 @@ import os, sys
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
 
-version = "0.7.0-1a"
+version = "0.7.1-0a"
 logpath = "/home/pi/tatiana/commonlog.txt"
 dbhost = 'localhost'
 dbbase='tatiana'
@@ -40,13 +40,24 @@ outpins = cursor.fetchall()
 for pin in outpins:
     GPIO.setup(int(pin[0]), GPIO.OUT)
 
-#Входные пины (управляющие) - кнопки и тд
+#Входные пины (управляющие) - кнопки для одиночных устройств
 query = "SELECT pin FROM `pins` WHERE `direction`='input'"
 cursor.execute(query)
 inpins = cursor.fetchall()
 for pin in inpins:
     GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=200)
+
+#Входные пины (управляющие) - для блочных устройств кнопки вынесены в отдельный тип
+query = "SELECT pin FROM `pins` WHERE `direction`='block'"
+cursor.execute(query)
+blockpins = cursor.fetchall()
+for pin in blockpins:
+    GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=200)
+
+
+
 
 cursor.close()
 connection.close()
@@ -107,7 +118,6 @@ def check_plan(cursor, logfile=logpath):
 
 
 
-
 ### Обработчик кнопок. Обновляет статус при нажатии на кнопку согласно привязкам в БД
 
 def button(inpin, cursor=cursor, logfile=logpath):
@@ -138,6 +148,58 @@ def button(inpin, cursor=cursor, logfile=logpath):
 
 
 
+### Обработчик блочных кнопок. Обновляет статусы по циклу при нажатии на кнопку согласно привязкам в БД button_block
+
+def button_block(inpin, cursor=cursor, logfile=logpath):
+    status_roll=[[0,0],[0,1],[1,0],[1,1]] #ролл-список статусов
+    outarray = ()
+    #узнаём привязанный выходной пин
+    query = "SELECT outpin FROM `button_block` WHERE `inpin`='"+str(inpin)+"'"
+    cursor.execute(query)
+    outarray = cursor.fetchall() #забираем все выходные пины
+    outarray = accu_list(outarray) #делаем аккуратный список выходных пинов
+    print(outarray)
+    statuses=[]
+    for pin in outarray:
+        query = "SELECT status FROM `pins` WHERE `pin`='"+str(pin)+"'"
+        cursor.execute(query)
+        statuses.append(cursor.fetchone())
+    statuses = accu_list(statuses) #делаем аккуратный список статусов
+    print(statuses)
+    state = status_roll.index(statuses) #номер комбинации пинов в ролл-списке
+    if state == 0:
+        logquery = "%BUTTONON% " + str(inpin) + " + " + str(outarray[1]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+        query = "UPDATE `pins` SET `status`='1' WHERE `pin`='" + str(outarray[1]) + "';"
+    elif state == 1:
+        logquery = "%BUTTONON% " + str(inpin) + " + " + str(outarray[0]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+        logquery = logquery + "%BUTTONOFF% " + str(inpin) + " + " + str(outarray[1]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+        query = "UPDATE `pins` SET `status`='1' WHERE `pin`='" + str(outarray[0]) + "';"
+        query = query + "UPDATE `pins` SET `status`='0' WHERE `pin`='" + str(outarray[1]) + "';"
+    elif state == 2:
+        logquery = "%BUTTONON% " + str(inpin) + " + " + str(outarray[1]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+        query = "UPDATE `pins` SET `status`='1' WHERE `pin`='" + str(outarray[1]) + "';"
+    else:
+        logquery = "%BUTTONOFF% " + str(inpin) + " + " + str(outarray[0]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+        logquery = logquery + "%BUTTONOFF% " + str(inpin) + " + " + str(outarray[1]) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+        query = "UPDATE `pins` SET `status`='0' WHERE `pin`='" + str(outarray[0]) + "';"
+        query = query + "UPDATE `pins` SET `status`='0' WHERE `pin`='" + str(outarray[1]) + "';"
+    #Пишем лог
+    lfile = open(logfile, "a")
+    lfile.write(logquery)
+    lfile.close()
+    #и в базу
+    cursor.execute(query)
+    connection.commit()
+
+
+
+### Слияние всяких списков в аккуратную линию
+
+def accu_list(array):
+    result=[]
+    for element in array:
+        result.append(element[0])
+    return result
 
 
 
@@ -148,42 +210,47 @@ f = open(logpath, "a")
 f.write("%UP% > " + str(ThisMoment) + " \n")
 f.close()
 
+# Подключаемся к БД
+connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
+cursor = connection.cursor()
+
 # Главный вечный цикл
 while True:
 
-# Подключаемся к БД
-    connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
-    cursor = connection.cursor()
-
-# Ловим нажатие кнопок
+# Ловим нажатие кнопок - одиночные
     for pin in inpins:
         #Если кнопка нажата
         if GPIO.event_detected(int(pin[0])):
             button(pin[0], cursor)
 
+# Ловим нажатие кнопок - блочные
+    for pin in blockpins:
+        #Если кнопка нажата
+        if GPIO.event_detected(int(pin[0])):
+            button_block(pin[0], cursor)
+
+
+
 # Проверяем статусы и обрабатываем их
     device(cursor, logpath)
-
-    cursor.close()
-    connection.close()
 
     
     time.sleep(0.05)
 
 # Планировщик срабатывает только один раз в секунду, больше нам и не надо.
     if ThisMoment != datetime.strftime(datetime.now(), "%H:%M:%S"):
-        connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
-        cursor = connection.cursor()
         ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
 #        print (str(ThisMoment))
         check_plan(cursor, logpath)
-        cursor.close()
-        connection.close()
     else:
         continue
 
 
+
 # ========= Прибираемся при выходе ========= #
+
+cursor.close()
+connection.close()
 
 GPIO.cleanup() 
 f = open(default_path + "commonlog.txt", "a")
