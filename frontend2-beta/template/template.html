@@ -93,11 +93,31 @@
                                     <div class='headercalendar'>Дни</div> 
                                     <!--<div class='headerdeleteplan'></div>-->
                                 </div>
+								<div class="planblock" id="plan">
                                 %PLAN%
+							    </div>
                             </div>
 
-						</div>
 
+							<div id="formAddPlan">
+							<select id="Dev">
+                            %SELECTITEMPLAN%
+						    </select>
+							
+                            <input id="timeOn"  type="text" value="00:00">
+							<input id="timeOff" type="text" value="00:00">
+							
+							<select id="calendar">
+							    <option value="1">Пн-Пт</option>
+								<option value="2">Сб-Вс</option>
+							</select>
+							
+							<button id="add">Добавить</button>
+							</div>
+							
+						    </div>
+							
+							
 						<footer>
                             <a href="#main" class="button scrolly">Назад к управлению</a>
 						</footer>

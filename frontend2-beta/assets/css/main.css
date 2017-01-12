@@ -2665,7 +2665,7 @@
 
 .headercalendar {
     float: left;
-    width: 12%;
+    width: 15%;
     border-right: solid 1px;
     border-bottom: solid 1px;
     border-top: solid 1px;
@@ -2710,10 +2710,10 @@
 
 .calendar {
     float: left;
-    width: 12%;
+    width: 15%;
     border-right: solid 1px;
     border-bottom: solid 1px;
-    padding-left: 2px;
+    padding-left: 12px;
     padding-right: 2px;
 }
 
@@ -2721,4 +2721,67 @@
     width: 100%;
     padding-top: 0px;
     padding-left: 40px;
+}
+
+
+.delLine{
+	color: #f4f9f9;
+	cursor: pointer;
+	margin-left: 5px;
+}
+
+.planrow:hover span.delLine{
+display: inline;
+color: #da1818;
+}
+
+#Dev, #timeOn, #timeOff, #calendar{
+float: left;
+outline: none;
+border-radius: 10px;
+}
+
+#Dev{
+width: 195px;
+margin-left: 0.7%;
+padding: 2px 10px 2px 55px;
+box-shadow: inset 1px 1px 1px #000;
+}
+
+#timeOn{
+    height: 31px;
+	width: 115px;
+    margin-left: 12px;
+	//padding: 15px;
+}
+
+#timeOff{
+    height: 31px;
+	width: 115px;
+    margin-left: 8px;
+	//padding: 15px;
+}
+
+#calendar{
+   width: 105px;
+   margin-left: 1.5%;
+   padding: 2px 10px 0px 10px;
+   box-shadow: inset 1px 1px 1px #000;
+}
+
+#formAddPlan{
+    background: #fff;
+    margin-top: 7px;
+    //margin-left: 17px;
+	border-radius: 7px;
+    padding: 7px 5px 5px 5px;
+    height: 45px;
+    width: 95%;
+}
+
+#add{
+    padding: 7px 15px 7px 15px;
+    float: left;
+    margin-left: 14px;
+    background: #409a54;
 }
