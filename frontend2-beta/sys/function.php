@@ -39,17 +39,12 @@ function readLog($num=1)
     while ($row = mysql_fetch_assoc($rq)) {
         $searchStr  = "%&nbsp;". $row['pin'] ."&nbsp;>";
         $replaceStr = "%&nbsp;". $row['name'] ."&nbsp;</div><div class='logright'>";
-		
         $echer = str_replace($searchStr, $replaceStr, $echer);
-		
         $searchStr  = "%&nbsp;". $row['pin'] ."&nbsp;+";
         $replaceStr = "%&nbsp;". $row['name'] . "&nbsp;&#10040;";
-		
         $echer = str_replace($searchStr, $replaceStr, $echer);
-		
         $searchStr  = "&nbsp;". $row['pin'] ."&nbsp;>";
         $replaceStr = "&nbsp;". $row['name'] . "&nbsp;</div><div class='logright'>";
-		
         $echer = str_replace($searchStr, $replaceStr, $echer);
     }
 	   
@@ -116,9 +111,9 @@ function check_tatiana(){
 
 function cpu_temp(){
     $string = exec('cat /sys/class/thermal/thermal_zone0/temp');
-    if ($string < 45000){
+    if ($string<45000){
         return "<span class='blue'>прохладно (". round($string/1000, 1) ."&deg;C)</span>";
-    }elseif ($string > 55000){
+    }elseif ($string>55000){
         return "<span class='red'>ЖАРКО! (". round($string/1000, 1) ."&deg;C)</span>";
     }else{
         return "<span class='green'>комфортно (". round($string/1000, 1) ."&deg;C)</span>";
@@ -128,26 +123,36 @@ function cpu_temp(){
 
 //Показывает план из базы с готовыми кнопками удаления.
 function show_plan(){
+    $plan = array();
     $query = mysql_query("SELECT * FROM `plan`");
-    while ($row = mysql_fetch_assoc($query)) 
-	{
-		
-	     if ($row['calendar'] == 1){$dayWeek = "Пн-Пт";}
-         elseif ($row['calendar'] == 2){$dayWeek = "Сб-Вс";}
-         else {$dayWeek = "Пн-Вс";}
-		
-	     $string .= '
-                     <div class="planrow">
-			         <div class="pinname">'  .pin_to_name($row['pin']). '</div>
-				     <div class="ontime">'   .$row['ontime'].           '</div> 
-				     <div class="offtime">'  .$row['offtime'].          '</div> 
-				     <div class="calendar">' .$dayWeek.' 
-			         <span class="delLine fa fa-minus-circle fa-1" data-unique-id="'.$row['id'].'"></span>
-				     </div>
-				     </div>
-				    ';
+    while ($string = mysql_fetch_assoc($query)) {
+        array_push($plan, array(
+           "id"       => $string['id'],
+           "pin"      => $string['pin'],
+           "ontime"   => $string['ontime'],
+           "offtime"  => $string['offtime'],
+           "calendar" => $string['calendar']
+        ));
+
     }
-  
+    
+    $string = "<div class=\"planblock\" id=\"plan\">\n";
+    foreach ($plan as $row){
+        if ($row['calendar'] == 1){$row['calendar'] = "Пн-Пт";}
+        elseif ($row['calendar'] == 2){$row['calendar'] = "Сб-Вс";}
+        else {$row['calendar'] = "Пн-Вс";}
+        $string = $string . 
+            "<div class='planrow' id ='".$row['id'] . "'>\n" .
+                "<div class='pinname'>" . pin_to_name($row['pin']) . "</div>\n" . 
+                "<div class='ontime'>" . $row['ontime'] . "</div>\n" . 
+                "<div class='offtime'>" . $row['offtime'] . "</div>\n" . 
+                "<div class='calendar'>" . $row['calendar'] . "</div>\n" . 
+                "</div>\n";
+    }
+    $string = $string . "</div>\n";
+
+    
+    
 return $string;
 }
 
@@ -156,21 +161,10 @@ return $string;
 //Самая нужная в мире функция, странно, что последняя в списке.
 //Прнимает номер пина, возвращает его название.
 function pin_to_name($pin){
-    $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='{$pin}' and `direction` = 'output'");
+    $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='".$pin."'");
     $pin_name = mysql_fetch_assoc($query);
     return $pin_name['name'];
 }
 
-function querySelectItem(){
-    $q = mysql_query("SELECT `name`,`pin` FROM `pins` WHERE `direction` = 'output' ORDER BY `pin` ASC");
-	
-	while($row = mysql_fetch_assoc($q))
-	{
-		$strOptTag .= '
-		<option value="'.$row['pin'].'">'.$row['name'].'</option>
-		';
-	}
-	
-    return $strOptTag;
-}
+
 ?>

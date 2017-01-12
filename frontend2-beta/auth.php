@@ -32,10 +32,8 @@ if (!empty($_POST))
 		     setcookie('sid', $hash);
 		
              $_SESSION['auth'][$hash] = 'authorised';
-		     
-			 $lastTime = date('d.m.Y H:i:s', time());
-			 
-		     mysql_query("UPDATE `users` SET `user_sid` = '".session_id()."', `last_login` = '{$lastTime}' WHERE `login` = '{$login}'");
+		
+		     mysql_query("UPDATE `users` SET `user_sid` = '".session_id()."' WHERE `login` = '{$login}'");
 		
 		     header("Location: http://".$_SERVER['HTTP_HOST']."/");
              exit;

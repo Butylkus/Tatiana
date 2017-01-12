@@ -26,7 +26,6 @@ $echoer = str_replace("%UPTIME%",                uptime(),                 $echo
 $echoer = str_replace("%CPUTEMP%",               cpu_temp(),               $echoer);
 $echoer = str_replace("%USERAUTH%",              $userDB['username'],      $echoer);
 $echoer = str_replace("%LASTAUTH%",              $_COOKIE['lastTimeAuth'], $echoer);
-$echoer = str_replace("%SELECTITEMPLAN%",        querySelectItem(),        $echoer);
 
 
 
