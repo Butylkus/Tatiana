@@ -13,11 +13,11 @@ import time
 from datetime import datetime
 import pymysql as MYSQL #используем более короткий синоним, ибо нех
 import RPi.GPIO as GPIO
-import os, sys
+import os, sys, signal
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
 
-version = "0.7.1-0a"
+version = "0.7.1-1a"
 logpath = "/home/pi/tatiana/commonlog.txt"
 dbhost = 'localhost'
 dbbase='tatiana'
@@ -158,7 +158,6 @@ def button_block(inpin, cursor=cursor, logfile=logpath):
     cursor.execute(query)
     outarray = cursor.fetchall() #забираем все выходные пины
     outarray = accu_list(outarray) #делаем аккуратный список выходных пинов
-    print(outarray)
     statuses=[]
     for pin in outarray:
         query = "SELECT status FROM `pins` WHERE `pin`='"+str(pin)+"'"
@@ -193,6 +192,7 @@ def button_block(inpin, cursor=cursor, logfile=logpath):
 
 
 
+
 ### Слияние всяких списков в аккуратную линию
 
 def accu_list(array):
@@ -203,12 +203,28 @@ def accu_list(array):
 
 
 
+### Выключатель демона
+
+def stop(signum, frame, logfile=logpath):
+    GPIO.cleanup() 
+    f = open(logfile, "a")
+    f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+    f.close()
+    sys.exit("STOPPED BY SIGTERM")
+    
+
+
+
+
+
+
 # ========= Главная программа ========= #
 
 # Пишем в лог время старта скрипта
 f = open(logpath, "a")
 f.write("%UP% > " + str(ThisMoment) + " \n")
 f.close()
+signal.signal(signal.SIGTERM, stop)
 
 # Подключаемся к БД
 connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
@@ -229,31 +245,18 @@ while True:
         if GPIO.event_detected(int(pin[0])):
             button_block(pin[0], cursor)
 
-
-
 # Проверяем статусы и обрабатываем их
     device(cursor, logpath)
 
-    
+# Спим, снижая нагрузку на сервер
     time.sleep(0.05)
 
 # Планировщик срабатывает только один раз в секунду, больше нам и не надо.
     if ThisMoment != datetime.strftime(datetime.now(), "%H:%M:%S"):
         ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
-#        print (str(ThisMoment))
         check_plan(cursor, logpath)
     else:
         continue
 
 
 
-# ========= Прибираемся при выходе ========= #
-
-cursor.close()
-connection.close()
-
-GPIO.cleanup() 
-f = open(default_path + "commonlog.txt", "a")
-f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
-f.close()
-sys.exit()
