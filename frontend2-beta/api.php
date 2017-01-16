@@ -80,13 +80,13 @@ case'switch_button':
       default: exit('{"error" : 1, "info" : "Ехай на хуй отсюда"}');
    }
    	
-//Проверяем существует ли пин если нет генерируем ошибку
+//Проверяем, существует ли пин, если нет - генерируем ошибку
     $disc = mysql_query("SELECT `status` FROM `pins` WHERE `pin` = '{$pin_num}'");
 	
     if(mysql_num_rows($disc) < 1) 
 	exit('{"error" : 1, "info" : "Пин не существует"}');
 
-//Если пин существует обновляем статус
+//Если пин существует, обновляем статус
 	
     if(mysql_query("UPDATE `pins` SET `status` = '{$status}' WHERE `pin` = '{$pin_num}'"))
 		
@@ -94,7 +94,7 @@ case'switch_button':
 	
    else print '{"error" : 1, "info" : "Статус не был обновлён! Ошибка: '.mysql_error().'"}';
 	
-//Если статус успешно обновился пишем это событие в лог
+//Если статус успешно обновился, пишем это событие в лог
 
 	 writelog($pin_num);
 	 
@@ -127,50 +127,50 @@ case'add_plan_item':
 //Проверяем время включения и выключения на соответствие формату 
   
 	 if(stripos($_POST['timeOn'], ':') === false){
-		exit('{"error" : 1, "timeOn" : "'.$_POST['timeOn'].'", "info" : "Упс! Что-то пошло не так"}');
+		exit('{"error" : 1, "timeOn" : "'.$_POST['timeOn'].'", "info" : "Ошибка во времени включения"}');
 	   }
 	   
         else
 		{ 
 	         $timeOn = explode(':',$_POST['timeOn']);
-		     if($timeOn[0] <= 23 && $timeOn[1] <= 59)
+		     if($timeOn[0] <= 23 && $timeOn[1] <= 59 && $timeOn[2] <= 59)
 				 
-			   $on = $timeOn[0].':'.$timeOn[1].':00';
+			   $on = $timeOn[0].':'.$timeOn[1]. ':' . $timeOn[2];
 		   
-		     else exit('{"error" : 1, "info" : "Не корректный формат времени"}');
+		     else exit('{"error" : 1, "info" : "Некорректный формат времени"}');
 	    }
 
 
 	   
 	 if(stripos($_POST['timeOff'], ':') === false){
-		exit('{"error" : 1, "timeOff" : "'.$_POST['timeOff'].'", "info" : "Упс! Что-то пошло не так"}');
+		exit('{"error" : 1, "timeOff" : "'.$_POST['timeOff'].'", "info" : "Ошибка во времени отключения"}');
 	   }
 	   
 	    else
 		{ 
 		     $timeOff = explode(':',$_POST['timeOff']);
-		     if($timeOff[0] <= 23 && $timeOff[1] <= 59)
+		     if($timeOff[0] <= 23 && $timeOff[1] <= 59 && $timeOff[2] <= 59)
 				 
-			   $off = $timeOff[0].':'.$timeOff[1].':00';
+			   $off = $timeOff[0].':'.$timeOff[1].':'.$timeOff[2];
 			   
-		     else exit('{"error" : 1, "info" : "Не корректный формат времени"}');
+		     else exit('{"error" : 1, "info" : "Некорректный формат времени"}');
 		}
 
 /////
 
 //Проверяем дни недели
-//Режим 1 - Пн-Пт, режим 2 - Сб-Вс
+//Режим 1 - Пн-Пт, режим 2 - Сб-Вс, режим 3 - Пн-Вс)
 	 
 	 if(ctype_digit($_POST['cal']))
 	 {
-	       if($_POST['cal'] < 1 || $_POST['cal'] > 2)
-		   exit('{"error" : 1, "info" : "Дни недели заданы не корректно"}'); 
+	       if($_POST['cal'] < 1 || $_POST['cal'] > 3)
+		   exit('{"error" : 1, "info" : "Дни недели заданы некорректно"}'); 
 	       else $calendar  = $_POST['cal'];
 	 }
 	 
 	 else 
 	 { 
-         exit('{"error" : 1, "info" : "Здесь не лохи седят!"}');
+         exit('{"error" : 1, "info" : "Здесь не лохи сидят!"}');
 	 }
 
 	

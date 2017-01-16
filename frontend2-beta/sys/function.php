@@ -99,15 +99,14 @@ function uptime(){
 
 
 //Возвращает статус главного скрипта - есть ли в памяти.
-//TODO: при демонизации переписать на вывод баша или опрос через инит.
 //И вообще: изучить скелеты инита, ридми и воскурить баш как следует, ибо ЪТатьяна==Ъдемон и всё будет решаться через инит. Движение к неубиваемому процессу началось.
 
 function check_tatiana(){
-    exec('ps ax | grep tatiana',$mainpid);
-    if (stristr($mainpid[0],"tatiana.py")){
+    exec('systemctl status tatiana.service',$mainpid);
+    if (stristr($mainpid[2],"Active: active (running)")){
         return "<span class='green'>трудится</span>";
     }else{
-        return "<span class='red'>УПАЛА! =(</span>";
+        return "<span class='red'>УПАЛА!</span>";
     }
 }
 
@@ -156,7 +155,7 @@ return $string;
 //Самая нужная в мире функция, странно, что последняя в списке.
 //Прнимает номер пина, возвращает его название.
 function pin_to_name($pin){
-    $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='{$pin}' and `direction` = 'output'");
+    $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='{$pin}'");
     $pin_name = mysql_fetch_assoc($query);
     return $pin_name['name'];
 }
@@ -173,4 +172,15 @@ function querySelectItem(){
 	
     return $strOptTag;
 }
+
+//Возвращает погоду в доме и на улице
+//лучше всего сделать связь через базу. Вполне неплохо получится.
+
+//function show_weather(){
+//<p>За окном: <strong>%OUTTEMP%&deg;C</strong> и <strong>%OUTHUMIDITY%%</strong> влажности</p>
+//<p>Дома: <strong>%INTEMP%&deg;C</strong> и <strong>%INHUMIDITY%%</strong> влажности</p>
+//}
+
+
+
 ?>

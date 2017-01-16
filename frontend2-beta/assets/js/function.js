@@ -205,12 +205,12 @@ const dev  = $('#Dev option:selected'),
 		    }).add('<div>',{
 			 
 		          class : 'ontime',
-                  text  : timeOn+':00'	
+                  text  : timeOn+''	
 			  
 		    }).add('<div>',{
 			
 		         class : 'offtime',
-		         text  : timeOff+':00'
+		         text  : timeOff+''
 		
 		    }).add('<div>',{
 			

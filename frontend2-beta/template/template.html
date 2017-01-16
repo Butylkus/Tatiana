@@ -23,8 +23,7 @@
 							<p>Привет, <strong>%USERAUTH%</strong> =)</p>
 							<p>Не виделись аж с <span id="lastTimeAuth">%LASTAUTH%</span>!</p> 
 							<p>Сейчас: %MENUDATE%</p>
-							<p>За окном: <strong>%OUTTEMP%&deg;C</strong> и <strong>%OUTHUMIDITY%%</strong> влажности</p>
-							<p>Дома: <strong>%INTEMP%&deg;C</strong> и <strong>%INHUMIDITY%%</strong> влажности</p>
+
 						</div>
 
 					<!-- менюшка -->
@@ -96,26 +95,28 @@
 								<div class="planblock" id="plan">
                                 %PLAN%
 							    </div>
+							    
+                                <div id="formAddPlan">
+                                    <select id="Dev">
+                                        %SELECTITEMPLAN%
+                                    </select>
+						    
+                                    <input id="timeOn"  type="text" value="чч:мм:сс" placeholder="чч:мм:сс">
+                                    <input id="timeOff" type="text" value="чч:мм:сс" placeholder="чч:мм:сс">
+                                    <select id="calendar">
+                                        <option value="1">Пн-Пт</option>
+                                        <option value="2">Сб-Вс</option>
+                                        <option value="3">Пн-Вс</option>
+                                    </select>
+
+                                    </div>
+                                    <center>
+                                    <button id="add">Записать в календарь</button>
+                                    </center>							
+                                </div>
+						    
                             </div>
 
-
-							<div id="formAddPlan">
-							<select id="Dev">
-                            %SELECTITEMPLAN%
-						    </select>
-							
-                            <input id="timeOn"  type="text" value="00:00">
-							<input id="timeOff" type="text" value="00:00">
-							
-							<select id="calendar">
-							    <option value="1">Пн-Пт</option>
-								<option value="2">Сб-Вс</option>
-							</select>
-							
-							<button id="add">Добавить</button>
-							</div>
-							
-						    </div>
 							
 							
 						<footer>
@@ -179,7 +180,19 @@
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="assets/js/main.js"></script>
             <script type="text/javascript" src="assets/js/function.js"></script>
-
+            <script src="assets/js/jquery.maskedinput.min.js"></script>
+            <script>
+                $(function(){
+                    $.mask.definitions['H'] = "[0-2]";
+                    $.mask.definitions['h'] = "[0-9]";    
+                    $.mask.definitions['M'] = "[0-5]";
+                    $.mask.definitions['m'] = "[0-9]";
+                    $.mask.definitions['S'] = "[0-5]";
+                    $.mask.definitions['s'] = "[0-9]";
+                    $("#timeOn").mask("Hh:Mm:Ss", {placeholder: "чч:мм:сс" });
+                    $("#timeOff").mask("Hh:Mm:Ss", {placeholder: "чч:мм:сс" });
+                });
+            </script>
 	</body>
 </html>
 
