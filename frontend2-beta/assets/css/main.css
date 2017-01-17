@@ -2551,26 +2551,27 @@
     font-weight: bold;
 }
 
-.loglist {
+#log_list {
 	margin: -1em auto -1em auto;
-	max-width: 600px;
+	width: 90%;
+    max-width: 600px;
 }
 
 .logger {
-    width: 70%;
     margin: auto;
 }
 
 .logleft {
-	width: 65%;
-	float: left;
 	text-align: left;
-    height: 38px;
+    display: table-cell;
+    vertical-align: middle;
 }
 
 .logright {
     text-align: right;
-    height: 38px;
+    display: table-cell;
+    vertical-align: middle;
+    width: 15%;
 }
 
 .commonplan {
@@ -2741,5 +2742,5 @@
 }
 
 #add{
-    font-size: 0.6em;
+    font-size: 0.8em;
 }

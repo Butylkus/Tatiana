@@ -208,7 +208,7 @@ def accu_list(array):
 def stop(signum, frame, logfile=logpath):
     GPIO.cleanup() 
     f = open(logfile, "a")
-    f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + " \n")
+    f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
     f.close()
     sys.exit("STOPPED BY SIGTERM")
     
@@ -222,7 +222,7 @@ def stop(signum, frame, logfile=logpath):
 
 # Пишем в лог время старта скрипта
 f = open(logpath, "a")
-f.write("%UP% > " + str(ThisMoment) + " \n")
+f.write("%UP% > " + str(ThisMoment) + "\n")
 f.close()
 signal.signal(signal.SIGTERM, stop)
 
