@@ -1617,7 +1617,7 @@
 		}
 
 	footer {
-		margin: 2em 0 0 0;
+		margin: 1em 0 0 1em;
 	}
 
 	strong, b {
@@ -2685,37 +2685,9 @@
 }
 
 
-
-#Dev{
-    width: 49%;
-    float: left;
-    margin-right: 10px;
-}
-
-#timeOn{
-    width: 13%;
-    margin-left: 10px;
-    margin-right: 10px;
-    float: left;
-    background-color: rgba(140,255,100,0.1);
-}
-
-#timeOff{
-	width: 14%;
-    margin-left: 10px;
-    margin-right: 10px;
-    float: left;
-    background-color: rgba(201, 36, 54, 0.11);
-}
-
-#calendar{
-   padding: 2px 10px 0px 10px;
-   box-shadow: inset 1px 1px 1px #000;
-    float: left;
-}
-
 #formAddPlan{
     padding-left: 40px;
+    padding-right: 2%;
     padding-top: 10px;
     display: flex;
     margin-left: 0px;
@@ -2724,7 +2696,50 @@
     width: 100%;
 }
 
+#Dev{
+    width: 50%;
+    float: left;
+    margin-right: 1%;
+    margin-left: auto;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#timeOn{
+    width: 14%;
+    margin-left: auto;
+    margin-right: auto;
+    float: left;
+    background-color: rgba(140,255,100,0.1);
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#timeOff{
+	width: 14%;
+    margin-left: auto;
+    margin-right: auto;
+    float: left;
+    background-color: rgba(201, 36, 54, 0.11);
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#calendar{
+    float: left;
+    width: 20%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.centerbutton{
+    width: 100%;
+    padding-top: 10px;
+    margin-left: 0.6em;
+}
+
 #add{
     font-size: 0.6em;
-
 }
