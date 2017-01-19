@@ -81,9 +81,9 @@ case'switch_button':
    }
    	
 //Проверяем, существует ли пин, если нет - генерируем ошибку
-    $totalPins = mysql_query("SELECT `status` FROM `pins` WHERE `pin` = '{$pin_num}'");
+    $disc = mysql_query("SELECT `status` FROM `pins` WHERE `pin` = '{$pin_num}'");
 	
-    if(mysql_num_rows($totalPins) < 1) 
+    if(mysql_num_rows($disc) < 1) 
 	exit('{"error" : 1, "info" : "Пин не существует"}');
 
 //Если пин существует, обновляем статус
@@ -135,7 +135,7 @@ case'add_plan_item':
 	         $timeOn = explode(':',$_POST['timeOn']);
 		     if($timeOn[0] <= 23 && $timeOn[1] <= 59 && $timeOn[2] <= 59)
 				 
-			   $on = $timeOn[0].':'.$timeOn[1].':'. $timeOn[2];
+			   $on = $timeOn[0].':'.$timeOn[1]. ':' . $timeOn[2];
 		   
 		     else exit('{"error" : 1, "info" : "Некорректный формат времени"}');
 	    }
@@ -165,7 +165,7 @@ case'add_plan_item':
 	 {
 	       if($_POST['cal'] < 1 || $_POST['cal'] > 3)
 		   exit('{"error" : 1, "info" : "Дни недели заданы некорректно"}'); 
-	       else $calendar = $_POST['cal'];
+	       else $calendar  = $_POST['cal'];
 	 }
 	 
 	 else 
