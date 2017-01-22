@@ -106,7 +106,7 @@ function check_tatiana(){
     if (stristr($mainpid[2],"Active: active (running)")){
         return "<span class='green'>трудится</span>";
     }else{
-        return "<span class='red'>УПАЛА!</span>";
+        return "<span class='red'><a href='/wakeup.php'>УПАЛА!</a></span>";
     }
 }
 
