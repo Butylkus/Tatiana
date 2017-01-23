@@ -2744,3 +2744,8 @@
 #add{
     font-size: 0.8em;
 }
+
+#clock{
+	color: #ccc;
+	font-weight: bold;
+}

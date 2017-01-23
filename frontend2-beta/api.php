@@ -38,9 +38,9 @@ $res = array(
 	    { 
 	
 		   array_push($res['dev'], array(
-		   "pinNum" =>$row['pin'],
-		   "status" =>0,
-		   "deviceName" => $row['name']
+		   "pinNum"      => $row['pin'],
+		   "status"      => 0,
+		   "deviceName"  => $row['name']
 		   ));
 		 
 		}
@@ -48,9 +48,9 @@ $res = array(
 		{
 			
 		   array_push($res['dev'], array(
-		   "pinNum" =>$row['pin'],
-		   "status" =>1,
-		   "deviceName" => $row['name']
+		   "pinNum"      => $row['pin'],
+		   "status"      => 1,
+		   "deviceName"  => $row['name']
 		   ));
 		 
 		}
@@ -96,7 +96,7 @@ case'switch_button':
 	
 //Если статус успешно обновился, пишем это событие в лог
 
-	 writelog($pin_num);
+	 @writelog($pin_num);
 	 
 break;
 
@@ -183,6 +183,22 @@ case'add_plan_item':
 	 if($total_into = mysql_affected_rows() > 0)
 	 print '{"error" : 0, "info" : "Добавлено записей: '.$total_into.'","lastId" : "'.mysql_insert_id().'"}';
  
+break;
+
+
+
+case'time_server':
+
+  $time = time();
+
+  $dataTime = array(
+  "hour"     => date('H',$time),
+  "minutes"  => date('i',$time),
+  "seconds"   => date('s',$time)
+  );
+  
+  print json_encode($dataTime);
+   
 break;
 default:
 print '{"error" : 1, "info" : "Не корректный запрос"}';
