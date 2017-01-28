@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Двери закрыты...</title>
+	<link rel="stylesheet" href="assets/css/style.css" media="screen" type="text/css" />
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+    <div id="login-form">
+      <h1>Кто там?</h1>
+        <fieldset>
+            <form action="/auth.php" method="post">
+                <input type="username" name="user" required value="Логин" onBlur="if(this.value=='')this.value='Логин'" onFocus="if(this.value=='Логин')this.value='' "> 
+                <input type="password" name="pass" required value="Пароль" onBlur="if(this.value=='')this.value='Пароль'" onFocus="if(this.value=='Пароль')this.value='' "> 
+                <input type="submit" value="Зая, открывай!">
+            </form>
+        </fieldset>
+    </div> 
+</body>
+</html>

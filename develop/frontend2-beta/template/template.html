@@ -1,0 +1,199 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Татьяна - умная домохозяйка в умном доме</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+	</head>
+	<body>
+
+		<!-- шапка -->
+			<div id="header">
+
+				<div class="top">
+
+					<!-- Инфа -->
+						<div id="logo">
+							<!-- Инфа -->
+							<h1 id="title">Татьяна %IS TATIANA.PY RUNNING%</h1>
+							<p>Привет, <strong>%USERAUTH%</strong> =)</p>
+							<p>Не виделись аж с <span id="lastTimeAuth">%LASTAUTH%</span>!</p> 
+							<p>Сейчас: <span id="clock">Уточняю время...</span></p>
+
+						</div>
+
+					<!-- менюшка -->
+						<nav id="nav">
+							<ul>
+								<li><a href="#main" id="top-link" class="skel-layers-ignoreHref"><span class="icon fa-home">Управление</span></a></li>
+								<li><a href="#plan" id="portfolio-link" class="skel-layers-ignoreHref"><span class="icon fa-clock-o">Планирование</span></a></li>
+								<li><a href="#log" id="about-link" class="skel-layers-ignoreHref"><span class="icon fa-eye">События</span></a></li>
+								<li><a href="#service" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-linux">Сервис</span></a></li>
+								<li><a href="%LOGOUT%" id="contact-link" class="skel-layers-ignoreHref"><span class="icon fa-sign-out">Выход</span></a></li>
+							</ul>
+						</nav>
+
+				</div>
+
+				<div class="bottom">
+
+					<!-- футер менюхи. Всякий треш -->
+
+
+				</div>
+
+			</div>
+
+		<!-- основное поле -->
+			<div id="main">
+
+				<!-- управление домом -->
+					<section id="top" class="one dark cover">
+						<div class="container">
+
+							<header>
+								<h2 class="alt">Управление домом</h2>
+								<p>Нажатие включает и выключает соответствующее устройство</p>
+							</header>
+
+							<!-- КНОПКИ УПРАВЛЕНИЯ -->
+							<div class="row">
+							<div id="buttons" class="controlbutton">
+							<!--Здесь будут отрисованы кнопки. Ничего вписывать не надо! -->
+							</div>
+                            </div>
+							
+							<footer>
+								<a href="#log" class="button scrolly">Проверить записи Татьяны</a>
+								<!--Ссылаться можно куда угодно-->
+							</footer>
+
+						</div>
+					</section>
+
+				<!-- планирование -->
+					<section id="plan" class="two">
+						<div class="container">
+
+							<header>
+								<h2>Планирование</h2>
+							</header>
+
+							<p>Календарь Татьяны. Она будет включать и выключать устройства самостоятельно по заданному плану с точностью до секунды.</p>
+                            <div class="row">
+                                <div class="headerblock">
+                                    <div class='headerpinname'>Устройство</div> 
+                                    <div class='headerontime'><img src="images/planon.png" /></div> 
+                                    <div class='headerofftime'><img src="images/planoff.png" /></div>
+                                    <div class='headercalendar'>Дни</div> 
+                                    <!--<div class='headerdeleteplan'></div>-->
+                                </div>
+								<div class="planblock" id="plan">
+                                %PLAN%
+							    </div>
+							    
+                                <div id="formAddPlan">
+                                    <select id="Dev">
+                                        %SELECTITEMPLAN%
+                                    </select>
+						    
+                                    <input id="timeOn"  type="text" value="чч:мм:сс" placeholder="чч:мм:сс">
+                                    <input id="timeOff" type="text" value="чч:мм:сс" placeholder="чч:мм:сс">
+                                    <select id="calendar">
+                                        <option value="1">Пн-Пт</option>
+                                        <option value="2">Сб-Вс</option>
+                                        <option value="3">Пн-Вс</option>
+                                    </select>
+
+                                    </div>
+                                    <div class="centerbutton">
+                                    <button id="add">Записать в календарь</button>
+                                    </div>							
+                                </div>
+						    
+                            </div>
+
+							
+							
+						<footer>
+                            <a href="#main" class="button scrolly">Назад к управлению</a>
+						</footer>
+						
+						</section>
+
+				<!-- Логи -->
+					<section id="log" class="three">
+						<div class="container">
+
+							<header>
+								<h2>Что происходит?</h2>
+								<p>Татьяна тщательно записывает всё происходящее в свою записную книжечку и сразу же отчитывается. Ничто не ускользнёт от её бдительного контроля!</p>
+							</header>
+
+							<div id="log_list">Секундочку! Я думаю...</div>
+							
+							<footer>
+								<a href="#main" class="button scrolly">Назад к управлению</a>
+							</footer>
+
+						</div>
+					</section>
+
+				<!-- Сервисная страница -->
+				
+					<section id="service" class="four">
+						<div class="container">
+
+							<header>
+								<h2>Обслуживание системы</h2>
+							</header>
+
+							<p>Старт системы: <strong>%UPTIME%</strong></p>
+							<p>Татьяна в дереве процессов: %IS TATIANA.PY RUNNING%</p>
+							<p>Татьяне %CPUTEMP%</p>
+							<p>Не обижайте Татьяну! :-P</p>
+
+
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Footer -->
+			<div id="footer">
+                <p>Разработано: Бутылкус и компания<br />
+                Распространяется по законам GPL<br />
+                Авторы не несут ответственности за любые последствия результатов работы программно-аппаратного комплекса "Татьяна - умная домохозяйка" или отдельных их компонентов!
+                </p>
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/jquery.scrollzer.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+            <script type="text/javascript" src="assets/js/function.js"></script>
+			<script type="text/javascript" src="assets/js/clock.js"></script>
+            <script src="assets/js/jquery.maskedinput.min.js"></script>
+            <script>
+                $(function(){
+                    $.mask.definitions['H'] = "[0-2]";
+                    $.mask.definitions['h'] = "[0-9]";    
+                    $.mask.definitions['M'] = "[0-5]";
+                    $.mask.definitions['m'] = "[0-9]";
+                    $.mask.definitions['S'] = "[0-5]";
+                    $.mask.definitions['s'] = "[0-9]";
+                    $("#timeOn").mask("Hh:Mm:Ss", {placeholder: "чч:мм:сс" });
+                    $("#timeOff").mask("Hh:Mm:Ss", {placeholder: "чч:мм:сс" });
+                });
+            </script>
+	</body>
+</html>
+
