@@ -27,6 +27,7 @@ $echoer = str_replace("%USERAUTH%",              $userDB['username'],      $echo
 $echoer = str_replace("%LASTAUTH%",              $_COOKIE['lastTimeAuth'], $echoer);
 $echoer = str_replace("%SELECTITEMPLAN%",        querySelectItem(),        $echoer);
 $echoer = str_replace("%IS TATIANA.PY RUNNING%", check_tatiana(),          $echoer);
+$echoer = str_replace("%WEATHER%",               show_weather(),           $echoer);
 
 
 echo $echoer;

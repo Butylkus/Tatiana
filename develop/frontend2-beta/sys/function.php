@@ -106,7 +106,7 @@ function check_tatiana(){
     if (stristr($mainpid[2],"Active: active (running)")){
         return "<span class='green'>трудится</span>";
     }else{
-        return "<span class='red'><a href='/wakeup.php'>УПАЛА!</a></span>";
+        return "<span class='red'><a href='/wakeup.php'>УПАЛА!<br>нажми меня</a></span>";
     }
 }
 
@@ -174,12 +174,31 @@ function querySelectItem(){
 }
 
 //Возвращает погоду в доме и на улице
-//лучше всего сделать связь через базу. Вполне неплохо получится.
+//
 
-//function show_weather(){
-//<p>За окном: <strong>%OUTTEMP%&deg;C</strong> и <strong>%OUTHUMIDITY%%</strong> влажности</p>
-//<p>Дома: <strong>%INTEMP%&deg;C</strong> и <strong>%INHUMIDITY%%</strong> влажности</p>
-//}
+function show_weather(){
+//Справочно формат в шаблоне:
+//За окном: <strong>%OUTTEMP%&deg;C</strong> и <strong>%OUTHUMIDITY%%</strong> влажности
+//Дома: <strong>%INTEMP%&deg;C</strong> и <strong>%INHUMIDITY%%</strong> влажности
+    $weather = array();
+    $query = mysql_query("SELECT `pin`,`name` FROM `pins` WHERE `direction`='dht'");
+    while ($sensor = mysql_fetch_assoc($query))
+    {
+        //$sensor['pin'] $sensor['name']
+        $data = mysql_query("SELECT `temperature`,`humidity`,`timestamp` FROM `dht_data` WHERE `pin`='" . $sensor['pin'] . "' ORDER BY `timestamp` DESC");
+        $weather[$sensor['name']] = mysql_fetch_assoc($data);
+    }
+    $result = "<div class='weather'><div class='weatherrow'><div class='weathercell'>Погода</div><div class='weathercell'>t, &deg;C</div><div class='weathercell'>&phi;, %</div><div class='weathercell'>время</div></div>";
+    foreach ($weather as $name=>$data)
+    {
+        if (isset($data['timestamp']))
+        {
+            $result =  $result . "<div class='weatherrow'><div class='weathercell'>" . $name . "</div><div class='weathercell'>" . $data['temperature'] . "&deg;C</div><div class='weathercell'>" . $data['humidity'] . "%</div><div class='weathercell'>" . date("H:i",$data['timestamp']) . "</div></div>";
+        }
+    }
+    $result = $result . "</div>";
+    return $result;
+}
 
 
 

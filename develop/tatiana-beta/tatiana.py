@@ -10,19 +10,18 @@
 # ========= Импортируем модули, настраиваем их ========= #
 
 import time
+import os, sys, signal, threading
 from datetime import datetime
 import pymysql as MYSQL #используем более короткий синоним, ибо нех
 import RPi.GPIO as GPIO
-import os, sys, signal
+import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
+import config
+
+version = "0.7.2-0a"
+
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
 
-version = "0.7.1-1a"
-logpath = "/home/pi/tatiana/commonlog.txt"
-dbhost = 'localhost'
-dbbase='tatiana'
-dbuser='tatiana'
-dbpassword='tatiana'
 
 
 # ========= Настраиваем пины согласно базе данных ========= #
@@ -30,7 +29,7 @@ dbpassword='tatiana'
 # При перенастройке системы её НЕОБХОДИМО перезапустить!
 # Настройки нельзя переопределить на лету, они НЕ вступят в силу до перезапуска данной программы.
 
-connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
+connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
 cursor = connection.cursor()
 
 #Выходные пины (управляемые)
@@ -70,7 +69,7 @@ ThisMoment = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")
 # ========= Главные функции ========= #
 
 ### Проверяет и включает-выключает устройства согласно записям в БД
-def device(cursor, logfile=logpath):
+def device(cursor, logfile=config.logpath):
     query = "SELECT pin, status FROM `pins` WHERE `direction`='output'"
     cursor.execute(query)
     string = cursor.fetchall()
@@ -81,7 +80,7 @@ def device(cursor, logfile=logpath):
 
 ### Обработчик плана. Обновляет статусы при наступлении запланированного момента
 
-def check_plan(cursor, logfile=logpath):
+def check_plan(cursor, logfile=config.logpath):
     query = "SELECT pin, ontime, offtime, calendar FROM `plan`"
     cursor.execute(query)
     planarray = cursor.fetchall()
@@ -120,7 +119,7 @@ def check_plan(cursor, logfile=logpath):
 
 ### Обработчик кнопок. Обновляет статус при нажатии на кнопку согласно привязкам в БД
 
-def button(inpin, cursor=cursor, logfile=logpath):
+def button(inpin, cursor=cursor, logfile=config.logpath):
     #узнаём привязанный выходной пин
     query = "SELECT outpin FROM `button_device` WHERE `inpin`='"+str(inpin)+"'"
     cursor.execute(query)
@@ -150,7 +149,7 @@ def button(inpin, cursor=cursor, logfile=logpath):
 
 ### Обработчик блочных кнопок. Обновляет статусы по циклу при нажатии на кнопку согласно привязкам в БД button_block
 
-def button_block(inpin, cursor=cursor, logfile=logpath):
+def button_block(inpin, cursor=cursor, logfile=config.logpath):
     status_roll=[[0,0],[0,1],[1,0],[1,1]] #ролл-список статусов
     outarray = ()
     #узнаём привязанный выходной пин
@@ -192,7 +191,6 @@ def button_block(inpin, cursor=cursor, logfile=logpath):
 
 
 
-
 ### Слияние всяких списков в аккуратную линию
 
 def accu_list(array):
@@ -203,9 +201,42 @@ def accu_list(array):
 
 
 
+### 
+
+def dht_reader(interval=1800):
+    connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
+    cursor = connection.cursor()
+    while True:
+        #забираем модели датчиков и их пины
+        query = "SELECT pin,model FROM `dht_sensors`"
+        cursor.execute(query)
+        outarray = cursor.fetchall()
+        #считываем показания каждого датчика
+        for sensor in outarray:
+            #трижды, да!
+            i=0
+            while i<3:
+                humidity, temperature = dht.read_retry(sensor[1], sensor[0])
+                if (humidity is not None) and (temperature is not None):
+                    nowtime = str(round(time.time()))
+                    temperature = str(temperature)
+                    humidity = str(humidity)
+                i+=1
+            #но сохраняем только последнее
+            query = "INSERT INTO `dht_data`(`pin`, `temperature`, `humidity`, `timestamp`) VALUES ({0},{1},{2},{3})".format(sensor[0], temperature, humidity, nowtime)
+            cursor.execute(query)
+            connection.commit()
+        #и ложимся спать на указанное время
+        time.sleep(interval)
+    #вообще-то оно оборвётся при выходе само, но так будет разумнее...
+    cursor.close()
+    connection.close()
+
+
+
 ### Выключатель демона
 
-def stop(signum, frame, logfile=logpath):
+def stop(signum, frame, logfile=config.logpath):
     GPIO.cleanup() 
     f = open(logfile, "a")
     f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
@@ -221,18 +252,24 @@ def stop(signum, frame, logfile=logpath):
 # ========= Главная программа ========= #
 
 # Пишем в лог время старта скрипта
-f = open(logpath, "a")
+f = open(config.logpath, "a")
 f.write("%UP% > " + str(ThisMoment) + "\n")
 f.close()
 signal.signal(signal.SIGTERM, stop)
 
+
+#Запускаем поток для сенсоров температуры и влажности
+threading.Thread(target=dht_reader).start()
+
+
 # Подключаемся к БД
-connection = MYSQL.connect(host=dbhost, database=dbbase, user=dbuser, password=dbpassword)
+connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
 cursor = connection.cursor()
+
+
 
 # Главный вечный цикл
 while True:
-
 # Ловим нажатие кнопок - одиночные
     for pin in inpins:
         #Если кнопка нажата
@@ -246,7 +283,7 @@ while True:
             button_block(pin[0], cursor)
 
 # Проверяем статусы и обрабатываем их
-    device(cursor, logpath)
+    device(cursor, config.logpath)
 
 # Спим, снижая нагрузку на сервер
     time.sleep(0.05)
@@ -254,7 +291,7 @@ while True:
 # Планировщик срабатывает только один раз в секунду, больше нам и не надо.
     if ThisMoment != datetime.strftime(datetime.now(), "%H:%M:%S"):
         ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
-        check_plan(cursor, logpath)
+        check_plan(cursor, config.logpath)
     else:
         continue
 

@@ -2749,3 +2749,16 @@
 	color: #ccc;
 	font-weight: bold;
 }
+
+.weather{
+    font-size: 0.6em;
+    display: table;
+}
+
+.weatherrow{
+    display: table-row;
+}
+
+.weathercell{
+    display: table-cell;
+}
