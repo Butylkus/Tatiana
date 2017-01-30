@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.2-0a"
+version = "0.7.2-1a"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -32,14 +32,14 @@ GPIO.setmode(GPIO.BCM)
 connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
 cursor = connection.cursor()
 
-#Выходные пины (управляемые)
+# Выходные пины (управляемые)
 query = "SELECT pin FROM `pins` WHERE `direction`='output'"
 cursor.execute(query)
 outpins = cursor.fetchall()
 for pin in outpins:
     GPIO.setup(int(pin[0]), GPIO.OUT)
 
-#Входные пины (управляющие) - кнопки для одиночных устройств
+# Входные пины (управляющие) - кнопки для одиночных устройств
 query = "SELECT pin FROM `pins` WHERE `direction`='input'"
 cursor.execute(query)
 inpins = cursor.fetchall()
@@ -47,7 +47,7 @@ for pin in inpins:
     GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=200)
 
-#Входные пины (управляющие) - для блочных устройств кнопки вынесены в отдельный тип
+# Входные пины (управляющие) - для блочных устройств кнопки вынесены в отдельный тип
 query = "SELECT pin FROM `pins` WHERE `direction`='block'"
 cursor.execute(query)
 blockpins = cursor.fetchall()
@@ -56,14 +56,14 @@ for pin in blockpins:
     GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=200)
 
 
-
-
 cursor.close()
 connection.close()
 
 
-ThisMoment = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")
-
+# Инициализируем отсечки времени. Понадобятся для главного цикла
+this_moment = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S") #общая
+dht_moment = round(time.time()) #для датчиков температуры-влажности
+plan_moment = round(time.time()) #для планировщика
 
 
 # ========= Главные функции ========= #
@@ -201,36 +201,34 @@ def accu_list(array):
 
 
 
-### 
+### Обработчик датчиков температуры-влажности
+### Выполняется в отдельном потоке, поэтому аргументы не нужны, а подключение к базе происходит отдельно, курсор не передаётся
 
-def dht_reader(interval=1800):
+def dht_reader():
     connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
     cursor = connection.cursor()
-    while True:
-        #забираем модели датчиков и их пины
-        query = "SELECT pin,model FROM `dht_sensors`"
+    #забираем модели датчиков и их пины
+    query = "SELECT pin,model FROM `dht_sensors`"
+    cursor.execute(query)
+    outarray = cursor.fetchall()
+    #считываем показания каждого датчика
+    for sensor in outarray:
+        #трижды, да!
+        i=0
+        while i<3:
+            humidity, temperature = dht.read_retry(sensor[1], sensor[0])
+            if (humidity is not None) and (temperature is not None):
+                nowtime = str(round(time.time()))
+                temperature = str(temperature)
+                humidity = str(humidity)
+            i+=1
+        #но сохраняем только последнее
+        query = "INSERT INTO `dht_data`(`pin`, `temperature`, `humidity`, `timestamp`) VALUES ({0},{1},{2},{3})".format(sensor[0], temperature, humidity, nowtime)
         cursor.execute(query)
-        outarray = cursor.fetchall()
-        #считываем показания каждого датчика
-        for sensor in outarray:
-            #трижды, да!
-            i=0
-            while i<3:
-                humidity, temperature = dht.read_retry(sensor[1], sensor[0])
-                if (humidity is not None) and (temperature is not None):
-                    nowtime = str(round(time.time()))
-                    temperature = str(temperature)
-                    humidity = str(humidity)
-                i+=1
-            #но сохраняем только последнее
-            query = "INSERT INTO `dht_data`(`pin`, `temperature`, `humidity`, `timestamp`) VALUES ({0},{1},{2},{3})".format(sensor[0], temperature, humidity, nowtime)
-            cursor.execute(query)
-            connection.commit()
-        #и ложимся спать на указанное время
-        time.sleep(interval)
-    #вообще-то оно оборвётся при выходе само, но так будет разумнее...
+        connection.commit()
     cursor.close()
     connection.close()
+
 
 
 
@@ -241,8 +239,8 @@ def stop(signum, frame, logfile=config.logpath):
     f = open(logfile, "a")
     f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
     f.close()
-    sys.exit("STOPPED BY SIGTERM")
-    
+    sys.exit("Демон остановлен. Получен сигнал SIGTERM")
+
 
 
 
@@ -253,19 +251,15 @@ def stop(signum, frame, logfile=config.logpath):
 
 # Пишем в лог время старта скрипта
 f = open(config.logpath, "a")
-f.write("%UP% > " + str(ThisMoment) + "\n")
+f.write("%UP% > " + str(this_moment) + "\n")
 f.close()
+
 signal.signal(signal.SIGTERM, stop)
-
-
-#Запускаем поток для сенсоров температуры и влажности
-threading.Thread(target=dht_reader).start()
 
 
 # Подключаемся к БД
 connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
 cursor = connection.cursor()
-
 
 
 # Главный вечный цикл
@@ -285,15 +279,19 @@ while True:
 # Проверяем статусы и обрабатываем их
     device(cursor, config.logpath)
 
-# Спим, снижая нагрузку на сервер
-    time.sleep(0.05)
 
 # Планировщик срабатывает только один раз в секунду, больше нам и не надо.
-    if ThisMoment != datetime.strftime(datetime.now(), "%H:%M:%S"):
-        ThisMoment = datetime.strftime(datetime.now(), "%H:%M:%S")
+    if plan_moment != round(time.time()):
+        plan_moment = round(time.time())
         check_plan(cursor, config.logpath)
-    else:
-        continue
+
+
+ #Опрос датчиков температуры-влажности проходит отдельным потоком (может занять много времени, аж до 15 секунд)
+    if (round(time.time()) - dht_moment >= config.dht_interval):
+        threading.Thread(target=dht_reader).start()
+        dht_moment = round(time.time())
 
 
 
+# Спим, снижая нагрузку на сервер
+    time.sleep(0.05)
