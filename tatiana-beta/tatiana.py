@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.2-2a"
+version = "0.7.2-3b"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -62,7 +62,7 @@ connection.close()
 
 # Инициализируем отсечки времени. Понадобятся для главного цикла
 this_moment = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S") #общая
-dht_moment = round(time.time()) #для датчиков температуры-влажности
+dht_moment = 0 #для датчиков температуры-влажности
 plan_moment = round(time.time()) #для планировщика
 
 
@@ -205,6 +205,7 @@ def accu_list(array):
 ### Выполняется в отдельном потоке, поэтому аргументы не нужны, а подключение к базе происходит отдельно, курсор не передаётся
 
 def dht_reader():
+    logquery = ""
     connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
     cursor = connection.cursor()
     #забираем модели датчиков и их пины
@@ -226,8 +227,13 @@ def dht_reader():
         query = "INSERT INTO `dht_data`(`pin`, `temperature`, `humidity`, `timestamp`) VALUES ({0},{1},{2},{3})".format(sensor[0], temperature, humidity, nowtime)
         cursor.execute(query)
         connection.commit()
+        logquery = logquery + "%DHTREAD% Опрос погоды {0} > {1}\n".format(sensor[0], str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")))
     cursor.close()
     connection.close()
+    f = open(config.logpath, "a")
+    f.write(logquery)
+    f.close()
+    
 
 
 
@@ -254,6 +260,8 @@ f = open(config.logpath, "a")
 f.write("%UP% > " + str(this_moment) + "\n")
 f.close()
 
+
+# Инициализируем перехватчик системных сигналов для выхода из программы
 signal.signal(signal.SIGTERM, stop)
 
 
@@ -286,8 +294,8 @@ while True:
         check_plan(cursor, config.logpath)
 
 
- #Опрос датчиков температуры-влажности проходит отдельным потоком (может занять много времени, аж до 15 секунд)
-    if (round(time.time()) - dht_moment == config.dht_interval):
+# Опрос датчиков температуры-влажности проходит отдельным потоком (может занять много времени, аж до 15 секунд)
+    if ((round(time.time()) - dht_moment == config.dht_interval) or (dht_moment == 0)):
         dht_moment = round(time.time())
         threading.Thread(target=dht_reader).start()
 

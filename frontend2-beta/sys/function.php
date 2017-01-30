@@ -64,6 +64,7 @@ function readLog($num=1)
     $echer = str_replace("%DOWN%&nbsp;>", "<div class='logleft'><img src='images/logsysdown.png' class='logpicture' title='Я заснула...'> Татьяна отдыхает</div><div class='logright'>", $echer);
     $echer = str_replace("%IRON%", "<div class='logleft'><img src='images/logiron.png' class='logpicture' title='Включено пультом ДУ'>", $echer);
     $echer = str_replace("%IROFF%", "<div class='logleft'><img src='images/logiroff.png' class='logpicture' title='Выключено пультом ДУ'>", $echer);
+    $echer = str_replace("%DHTREAD%", "<div class='logleft'><img src='images/logdht.png' class='logpicture' title='Опрошен датчик температуры+влажности'>", $echer);
     $echer = str_replace("\n", "</div>\n", $echer);
     
 	$echer = explode("\n",$echer);
@@ -174,12 +175,8 @@ function querySelectItem(){
 }
 
 //Возвращает погоду в доме и на улице
-//
 
 function show_weather(){
-//Справочно формат в шаблоне:
-//За окном: <strong>%OUTTEMP%&deg;C</strong> и <strong>%OUTHUMIDITY%%</strong> влажности
-//Дома: <strong>%INTEMP%&deg;C</strong> и <strong>%INHUMIDITY%%</strong> влажности
     $weather = array();
     $query = mysql_query("SELECT `pin`,`name` FROM `pins` WHERE `direction`='dht'");
     while ($sensor = mysql_fetch_assoc($query))
@@ -188,15 +185,15 @@ function show_weather(){
         $data = mysql_query("SELECT `temperature`,`humidity`,`timestamp` FROM `dht_data` WHERE `pin`='" . $sensor['pin'] . "' ORDER BY `timestamp` DESC");
         $weather[$sensor['name']] = mysql_fetch_assoc($data);
     }
-    $result = "<div class='weather'><div class='weatherrow'><div class='weathercell'>Погода</div><div class='weathercell'>t, &deg;C</div><div class='weathercell'>&phi;, %</div><div class='weathercell'>время</div></div>";
     foreach ($weather as $name=>$data)
     {
         if (isset($data['timestamp']))
         {
-            $result =  $result . "<div class='weatherrow'><div class='weathercell'>" . $name . "</div><div class='weathercell'>" . $data['temperature'] . "&deg;C</div><div class='weathercell'>" . $data['humidity'] . "%</div><div class='weathercell'>" . date("H:i",$data['timestamp']) . "</div></div>";
+            $result =  $result . "<div class='weatherrow'><div class='weathercell' id='dhtname'>" . $name . ": </div><div class='weathercell'>" . $data['temperature'] . "&deg;C</div><div class='weathercell'>" . $data['humidity'] . "%</div></div>";
+            $actuality_time = date("H:i",$data['timestamp']);
         }
     }
-    $result = $result . "</div>";
+    $result ="<div class='weather'><div class='weathercaption'>Погода на $actuality_time</div>" . $result . "</div>";
     return $result;
 }
 

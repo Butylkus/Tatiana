@@ -2753,6 +2753,8 @@
 .weather{
     font-size: 0.6em;
     display: table;
+    width: 90%;
+    line-height: 1.4em;
 }
 
 .weatherrow{
@@ -2761,4 +2763,16 @@
 
 .weathercell{
     display: table-cell;
+    
+}
+
+#dhtname{
+    width: 40%;
+    text-align: left;
+}
+
+.weathercaption{
+    display: table-caption;
+    caption-side: top;
+    text-align: center;
 }
