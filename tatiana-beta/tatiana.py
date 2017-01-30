@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.2-1a"
+version = "0.7.2-2a"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -287,9 +287,11 @@ while True:
 
 
  #Опрос датчиков температуры-влажности проходит отдельным потоком (может занять много времени, аж до 15 секунд)
-    if (round(time.time()) - dht_moment >= config.dht_interval):
-        threading.Thread(target=dht_reader).start()
+    if (round(time.time()) - dht_moment == config.dht_interval):
         dht_moment = round(time.time())
+        threading.Thread(target=dht_reader).start()
+
+
 
 
 
