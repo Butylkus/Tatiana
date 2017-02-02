@@ -1,11 +1,13 @@
-# Tatiana
-RUSSIAN LANGUAGE ONLY! Sorry, but if you want to understand what's going on, use any online translator.
+# Tatiana DEVELOPMENT BRANCH
+Разрабатываемые версии. Используйте на свой страх и риск!
+
+Как только функционал отлажен, он попадает в основную ветку.
 
 Структура репозитория
 ----
-[tatiana](https://github.com/Butylkus/Tatiana/tree/master/tatiana) - Основная программа, инструкция.
+[tatiana](https://github.com/Butylkus/Tatiana/tree/master/tatiana) - Бета-версия! Основная программа, инструкция.
 
-[frontend](https://github.com/Butylkus/Tatiana/tree/master/frontend2.0) - web-интерфейс, который связан с основным скриптом и умеет управлять устройствами.
+[frontend](https://github.com/Butylkus/Tatiana/tree/develop/frontend2-beta) - Бета-версия web-интерфейса, который связан с основным скриптом и умеет управлять устройствами.
 
 
 Баги, фичи и прочие реквесты

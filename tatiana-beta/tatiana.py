@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.2-3b"
+version = "0.7.3-1a"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -55,6 +55,14 @@ for pin in blockpins:
     GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=200)
 
+# Пины PIR-сенсоров.
+query = "SELECT pin FROM `pins` WHERE `direction`='pir'"
+cursor.execute(query)
+pirpins = cursor.fetchall()
+for pin in pirpins:
+    GPIO.setup(int(pin[0]), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(int(pin[0]), GPIO.FALLING, bouncetime=10000)
+
 
 cursor.close()
 connection.close()
@@ -64,6 +72,14 @@ connection.close()
 this_moment = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S") #общая
 dht_moment = 0 #для датчиков температуры-влажности
 plan_moment = round(time.time()) #для планировщика
+
+global stopsignal
+global capture_online
+stopsignal = False
+capture_online = False
+
+
+
 
 
 # ========= Главные функции ========= #
@@ -79,7 +95,6 @@ def device(cursor, logfile=config.logpath):
 
 
 ### Обработчик плана. Обновляет статусы при наступлении запланированного момента
-
 def check_plan(cursor, logfile=config.logpath):
     query = "SELECT pin, ontime, offtime, calendar FROM `plan`"
     cursor.execute(query)
@@ -118,7 +133,6 @@ def check_plan(cursor, logfile=config.logpath):
 
 
 ### Обработчик кнопок. Обновляет статус при нажатии на кнопку согласно привязкам в БД
-
 def button(inpin, cursor=cursor, logfile=config.logpath):
     #узнаём привязанный выходной пин
     query = "SELECT outpin FROM `button_device` WHERE `inpin`='"+str(inpin)+"'"
@@ -148,7 +162,6 @@ def button(inpin, cursor=cursor, logfile=config.logpath):
 
 
 ### Обработчик блочных кнопок. Обновляет статусы по циклу при нажатии на кнопку согласно привязкам в БД button_block
-
 def button_block(inpin, cursor=cursor, logfile=config.logpath):
     status_roll=[[0,0],[0,1],[1,0],[1,1]] #ролл-список статусов
     outarray = ()
@@ -192,7 +205,6 @@ def button_block(inpin, cursor=cursor, logfile=config.logpath):
 
 
 ### Слияние всяких списков в аккуратную линию
-
 def accu_list(array):
     result=[]
     for element in array:
@@ -203,7 +215,6 @@ def accu_list(array):
 
 ### Обработчик датчиков температуры-влажности
 ### Выполняется в отдельном потоке, поэтому аргументы не нужны, а подключение к базе происходит отдельно, курсор не передаётся
-
 def dht_reader():
     logquery = ""
     connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
@@ -233,14 +244,53 @@ def dht_reader():
     f = open(config.logpath, "a")
     f.write(logquery)
     f.close()
-    
 
+
+
+### Функция слежения через PIR-сенсор
+def pir_reader(pir_pin, capture = False):
+    global stopsignal
+    global capture_online
+    while not stopsignal:
+        if (GPIO.event_detected(pir_pin) and (capture_online == False)):
+            #тут надо записывать лог
+            logquery = "%PIRALARM% Движение {1} > {0}\n".format(str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")), pir_pin)
+            print(logquery)
+            f = open(config.logpath, "a")
+            f.write(logquery)
+            f.close()
+            if (capture == True):
+                threading.Thread(target=camera_capture).start()
+        time.sleep(0.1)
+
+
+
+### Глаза Татьяны. Включает камеру и записывает заданное количество секунд.
+def camera_capture():
+    global capture_online
+    capture_online = True
+    nowtime = str(round(time.time()))
+    
+#################################################################
+############Здесь должен быть перехват через SimpleCV############
+#################################################################
+
+    connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
+    cursor = connection.cursor()
+    query = "INSERT INTO `pir_data`(`message`,`timestamp`) VALUES ('{0}','{1}')".format("file.avi", nowtime)
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    time.sleep(5)                                   #ВРЕМЯ ЗАПИСИ!
+    capture_online = False
 
 
 
 ### Выключатель демона
-
 def stop(signum, frame, logfile=config.logpath):
+    global stopsignal
+    stopsignal = True
     GPIO.cleanup() 
     f = open(logfile, "a")
     f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
@@ -264,6 +314,9 @@ f.close()
 # Инициализируем перехватчик системных сигналов для выхода из программы
 signal.signal(signal.SIGTERM, stop)
 
+# Запуск потоков охраны
+for pin in pirpins:
+    threading.Thread(target=pir_reader, args=[int(pin[0]), True]).start()
 
 # Подключаемся к БД
 connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
@@ -298,9 +351,6 @@ while True:
     if ((round(time.time()) - dht_moment == config.dht_interval) or (dht_moment == 0)):
         dht_moment = round(time.time())
         threading.Thread(target=dht_reader).start()
-
-
-
 
 
 # Спим, снижая нагрузку на сервер
