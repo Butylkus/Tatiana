@@ -65,6 +65,7 @@ function readLog($num=1)
     $echer = str_replace("%IRON%", "<div class='logleft'><img src='images/logiron.png' class='logpicture' title='Включено пультом ДУ'>", $echer);
     $echer = str_replace("%IROFF%", "<div class='logleft'><img src='images/logiroff.png' class='logpicture' title='Выключено пультом ДУ'>", $echer);
     $echer = str_replace("%DHTREAD%", "<div class='logleft'><img src='images/logdht.png' class='logpicture' title='Опрошен датчик температуры+влажности'>", $echer);
+    $echer = str_replace("%PIRALARM%", "<div class='logleft'><img src='images/logalarm.png' class='logpicture' title='СРАБОТАЛ ДАТЧИК ДВИЖЕНИЯ!'>", $echer);
     $echer = str_replace("\n", "</div>\n", $echer);
     
 	$echer = explode("\n",$echer);
