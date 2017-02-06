@@ -5,7 +5,7 @@
 
 Структура репозитория
 ----
-[tatiana](https://github.com/Butylkus/Tatiana/tree/master/tatiana) - Бета-версия! Основная программа, инструкция.
+[tatiana](https://github.com/Butylkus/Tatiana/tree/develop/tatiana-beta) - Бета-версия! Основная программа, инструкция.
 
 [frontend](https://github.com/Butylkus/Tatiana/tree/develop/frontend2-beta) - Бета-версия web-интерфейса, который связан с основным скриптом и умеет управлять устройствами.
 
