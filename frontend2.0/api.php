@@ -99,7 +99,9 @@ case'switch_button':
 	 @writelog($pin_num);
 	 
 break;
-
+		
+//Планировщик
+		
 case'del_plan_item':
 
     if(!ctype_digit($_POST['unique_id']))
