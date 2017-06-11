@@ -159,7 +159,12 @@ return $string;
 function pin_to_name($pin){
     $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='{$pin}'");
     $pin_name = mysql_fetch_assoc($query);
-    return $pin_name['name'];
+    if (stristr($pin_name, "\n")) /////// Разобраться, почему выводится через перевод строки и устранить косяк
+    {
+        return $pin;
+    }else{
+        return $pin_name['name'];
+    }
 }
 
 function querySelectItem(){
