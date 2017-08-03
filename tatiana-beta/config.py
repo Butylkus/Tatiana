@@ -4,6 +4,7 @@
 
 # Путь к файлу лога. ВАЖНО: аналогичный путь должен быть задан в конфигурационном файле фронтенда!
 logpath = "/home/pi/tatiana/commonlog.txt"
+recordpath = "/home/pi/tatiana/alarmvideos/"
 
 # Подключение к базе данных. Доступы. 
 dbhost = 'localhost'

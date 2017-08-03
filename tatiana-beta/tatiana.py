@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.3-1a"
+version = "0.7.4-1a"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -268,21 +268,18 @@ def pir_reader(pir_pin, capture = False):
 ### Глаза Татьяны. Включает камеру и записывает заданное количество секунд.
 def camera_capture():
     global capture_online
-    capture_online = True
+    capture_online = True #Пошла запись
     nowtime = str(round(time.time()))
-    
-#################################################################
-############Здесь должен быть перехват через SimpleCV############
-#################################################################
-
+#### 29.07.2017 - даёшь глаза!
+    filename = config.recordpath + str(datetime.strftime(datetime.now(), "%Y%m%d-%H.%M.%S")) + ".mkv" #имя файла для записи с полным путём из конфига
+    os.system("ffmpeg -threads auto -an -t 00:00:30 -video_size 1280x720 -i /dev/video0 -c:v libx264 -preset:v superfast {0}".format(filename)) #погнали записывать
     connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
     cursor = connection.cursor()
-    query = "INSERT INTO `pir_data`(`message`,`timestamp`) VALUES ('{0}','{1}')".format("file.avi", nowtime)
+    query = "INSERT INTO `pir_data`(`message`,`timestamp`) VALUES ('{0}','{1}')".format(filename, nowtime)
     cursor.execute(query)
     connection.commit()
     cursor.close()
     connection.close()
-    time.sleep(5)                                   #ВРЕМЯ ЗАПИСИ!
     capture_online = False
 
 
@@ -316,7 +313,7 @@ signal.signal(signal.SIGTERM, stop)
 
 # Запуск потоков охраны
 for pin in pirpins:
-    threading.Thread(target=pir_reader, args=[int(pin[0]), True]).start()
+    threading.Thread(target=pir_reader, args=[int(pin[0]), False]).start()
 
 # Подключаемся к БД
 connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
