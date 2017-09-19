@@ -1,15 +1,13 @@
 <?php
-
-  session_start();
- 
-  if($_SESSION['auth'][$_COOKIE['sid']] != "authorised")
-  {
-      header("Location: http://".$_SERVER['HTTP_HOST']."/auth.php?logout");
-      exit;
-  }
+session_start();
+    if($_SESSION['auth'][$_COOKIE['sid']] != "authorised") {
+        header("HTTP/1.1 301 Moved Permanently");
+        header("Location: http://".$_SERVER['HTTP_HOST']."/auth.php");
+        exit;
+    }
   
- include_once 'sys/settings.php';
- include_once 'sys/function.php';
+include_once 'sys/settings.php';
+include_once 'sys/function.php';
 
 $userDB = mysql_query("SELECT `username` FROM `users` WHERE `user_sid` = '".session_id()."'");
 $userDB = mysql_fetch_assoc($userDB);

@@ -7,6 +7,7 @@ session_start();
       unset($_SESSION['auth']);
       setcookie("sid", "", time() - 3600);
 	  setcookie(session_name(), "", time() - 3600);
+	  header("HTTP/1.1 301 Moved Permanently");
       header("Location: http://".$_SERVER['HTTP_HOST']."/auth.php");
       exit; 
   }
