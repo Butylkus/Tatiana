@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <style>
+        .svg-container {
+            width:100%;
+            font-size: 1.6em;
+            font-family: MONOSPACE;
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body>
+  
+
+        <div class="svg-container">
+        
+<!-- начало вставки --->        
+        <h2 class="chartname">Температура за сутки</h2>
+        <span id="chart-container">начальный текст</span>
+
+<!-- конец -->        
+
+        </div>
+        
+        
+        
+        
+  <script>
+  function loadChart(holder) {
+    xmlhttp = new XMLHttpRequest();
+    var spanid = "chart-container";
+    var element = document.getElementById(spanid);
+    element.innerHTML = 'гружусь...';
+    xmlhttp.open("GET", holder);
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            element.innerHTML = xmlhttp.responseText;
+        }
+    }
+    xmlhttp.send(null);
+}
+  var index = 1;
+//  datareq = new XMLHttpRequest();
+    switch (index) {
+        case 1:
+            loadChart("/assets/charts/charts.php");
+            break;
+        case 2:
+            chart.innerHtml='кейс 2';
+            break;
+        default :
+            chart.innerHtml='дефолт';
+ 
+    }
+    
+
+  </script>
+      
+  </body>
+</html>
+
