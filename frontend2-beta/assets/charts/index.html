@@ -1,25 +1,37 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title></title>
+    <title>Всяческие графики</title>
     <style>
         .svg-container {
-            width:100%;
             font-size: 1.6em;
             font-family: MONOSPACE;
             text-align: center;
+           /* transform: scale(0.5); */
         }
-    </style>
+        svg {
+            font-weight: bold;
+        }    
+        .xtime {
+            font-size: 0.75em;
+            font-weight: normal;
+        }
+        </style>
   </head>
   <body>
   
 
         <div class="svg-container">
-        
+        <button onclick="btn(1)">Суточная T</button>
+        <button onclick="btn(2)">Суточная H</button>
+        <br>
+        <button onclick="btn(3)">Недельная T</button>
+        <button onclick="btn(4)">Недельная H</button>
+        <br>
+        <button onclick="btn('clear')">Упрятать</button>
 <!-- начало вставки --->        
-        <h2 class="chartname">Температура за сутки</h2>
-        <span id="chart-container">начальный текст</span>
-
+        <span id="chart-container"><br><br>Потыкай в кнопочки =)</span>
+        
 <!-- конец -->        
 
         </div>
@@ -27,7 +39,7 @@
         
         
         
-  <script>
+<script>
   function loadChart(holder) {
     xmlhttp = new XMLHttpRequest();
     var spanid = "chart-container";
@@ -41,22 +53,28 @@
     }
     xmlhttp.send(null);
 }
-  var index = 1;
-//  datareq = new XMLHttpRequest();
-    switch (index) {
+var index = 'clear';
+  function btn(index){
+      switch (index) {
         case 1:
-            loadChart("/assets/charts/charts.php");
+            loadChart("/assets/charts/charts.php?type=temp24");
             break;
         case 2:
-            chart.innerHtml='кейс 2';
+            loadChart("/assets/charts/charts.php?type=hmdt24");
             break;
-        default :
-            chart.innerHtml='дефолт';
- 
-    }
-    
-
-  </script>
+        case 3:
+            loadChart("/assets/charts/charts.php?type=temp7");
+            break;
+        case 4:
+            loadChart("/assets/charts/charts.php?type=hmdt7");
+            break;
+        case 'clear':
+            var spanid = "chart-container";
+            var element = document.getElementById(spanid);
+            element.innerHTML = '<br><br>Ммм, чистота, милота ^_^';
+     }
+  }
+</script>
       
   </body>
 </html>

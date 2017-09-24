@@ -157,7 +157,7 @@ return $string;
 //Самая нужная в мире функция, странно, что последняя в списке.
 //Прнимает номер пина, возвращает его название.
 function pin_to_name($pin){
-    $query = mysql_query("SELECT `name` FROM `pins` WHERE `pin`='{$pin}'");
+    $query = mysql_query("SELECT name FROM pins WHERE pin=$pin");
     $pin_name = mysql_fetch_assoc($query);
     if (stristr($pin_name, "\n")) /////// Разобраться, почему выводится через перевод строки и устранить косяк
     {
