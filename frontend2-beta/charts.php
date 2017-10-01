@@ -100,9 +100,7 @@ echo $form;
 		element = document.getElementById("period");
 		qstring = qstring + '&period=' + element.options[element.selectedIndex].value;
 		var element = document.getElementById("chart-container");
-        element.innerHTML = '<br><br>FOO>>> ' + qstring +' <<< BAR';
-			
-			loadChart("/sys/charts.php" + qstring);
+		loadChart("/sys/charts.php" + qstring);
     }
 </script>
 
