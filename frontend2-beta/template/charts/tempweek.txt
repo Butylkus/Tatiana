@@ -115,4 +115,4 @@
         %DAYAXIS%       
         
     </svg>
-    <p>Текущее: <strong>%CURRENTDOTVALUE%%</strong>, снято %CURRENTDOTDATATIME%</p>
+    <p>Текущее: <strong>%CURRENTDOTVALUE%&#8451;</strong>, снято %CURRENTDOTDATATIME%</p>
