@@ -2468,7 +2468,7 @@
 
 /* Mobile */
 
-	@media screen and (max-width: 736px) {
+	@media screen and (max-width: 719px) {
 
 		/* Basic */
 
@@ -2520,7 +2520,12 @@
 				#footer .copyright li:first-child {
 					margin-top: 0;
 				}
-
+        .action {
+            font-size: 1em;
+            margin:5px 5px 5px 5px;
+            /*width: 30%;*/
+            padding: 0.75em 0.3em 0.75em 0.3em;
+        }
 	}
 
 	
