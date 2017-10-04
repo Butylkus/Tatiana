@@ -1,4 +1,4 @@
-<h2 class="chartname">Влажность за сутки</h2>
+<h2 class="chartname">Влажность %DHTNAME% за сутки</h2>
     <svg width="1000" height="400">
 
 <!--10-->

@@ -37,7 +37,7 @@ include_once 'sys/settings.php';
 
 
 
-// Генерируем форму для показа радиокнопок
+// Генерируем форму для показа формы
 $form = 'График '."\n";
 //выводим селекты температуры и влажности
 $form .= "\t" . '<span class="typeselector"><select id="type"><option value="temp">температуры</option><option value="hmdt">влажности</option></select>'."\n";

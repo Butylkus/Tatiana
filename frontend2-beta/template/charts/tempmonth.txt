@@ -1,0 +1,85 @@
+<h2 class="chartname">Температура %DHTNAME% за месяц</h2>
+    <svg width="1000" height="400">
+
+<!--сеточка горизонталка-->
+<!--5-->
+        <line x1="0" x2="1000" y1="350" y2="350" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+<!--10-->
+        <line x1="0" x2="1000" y1="300" y2="300" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+<!--15-->
+        <line x1="0" x2="1000" y1="250" y2="250" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+<!--20-->
+        <line x1="0" x2="1000" y1="200" y2="200" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+<!--25-->
+        <line x1="0" x2="1000" y1="150" y2="150" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+<!--30-->
+        <line x1="0" x2="1000" y1="100" y2="100" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+<!--35-->
+        <line x1="0" x2="1000" y1="50" y2="50" 
+        style="fill:none;stroke:slategrey;stroke-width:1" />
+
+<!--сеточка вертикалочка-->
+        <line x1="20" x2="20" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="52" x2="52" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="84" x2="84" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="116" x2="116" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="148" x2="148" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="180" x2="180" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="212" x2="212" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="244" x2="244" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="276" x2="276" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="308" x2="308" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="340" x2="340" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="372" x2="372" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="404" x2="404" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="436" x2="436" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="468" x2="468" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="500" x2="500" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="532" x2="532" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="564" x2="564" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="596" x2="596" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="628" x2="628" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="660" x2="660" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="692" x2="692" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="724" x2="724" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="756" x2="756" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="788" x2="788" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="820" x2="820" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="852" x2="852" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="884" x2="884" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="916" x2="916" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+        <line x1="948" x2="948" y1="0" y2="390" style="fill:none;stroke:slategrey;stroke-width:1" />
+<!-- свежайший -->
+        <line x1="980" x2="980" y1="0" y2="390" 
+        style="fill:none;stroke:cyan;stroke-width:5" />
+
+
+<!--собсна график-->        
+        <polyline points="%POLYPOINTS%" style="fill:none;stroke:#FF0000;stroke-width:4" />
+<!-- точка свежайшего замера -->
+        <circle cx="%CURRENTDOTX%" cy="%CURRENTDOTY%" r="8px" stroke="#F00" stroke-width="2px" fill="#FFF"/>
+<!-- и подпись к ней -->
+        <text x="%CURRENTDOTX%" y="%CURRENTDOTY%" fill="#F00" transform="rotate(-90 %ROTATEDOTX%,%ROTATEDOTY%)">%CURRENTDOTVALUE%&#8451;</text>
+
+
+
+<!--подписи осей-->
+        <text class="yvalue" x="0" y="350" fill="#200772" style="transform:translate(0px,-5px);">5&#8451;</text>
+        <text class="yvalue" x="0" y="300" fill="#226078" style="transform:translate(0px,-5px);">10&#8451;</text>
+        <text class="yvalue" x="0" y="250" fill="#008209" style="transform:translate(0px,-5px);">15&#8451;</text>
+        <text class="yvalue" x="0" y="200" fill="#9FEE00" style="transform:translate(0px,-5px);">20&#8451;</text>
+        <text class="yvalue" x="0" y="150" fill="#CACA40" style="transform:translate(0px,-5px);">25&#8451;</text>
+        <text class="yvalue" x="0" y="100" fill="#FFC000" style="transform:translate(0px,-5px);">30&#8451;</text>
+        <text class="yvalue" x="0" y="50" fill="#FF0000" style="transform:translate(0px,-5px);">35&#8451;</text>
+        
+        %DAYAXIS%
+        
+        
+    </svg>
+<p>Текущее: <strong>%CURRENTDOTVALUE%&#8451;</strong>, снято %CURRENTDOTDATATIME%</p>

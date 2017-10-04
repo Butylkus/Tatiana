@@ -1,19 +1,5 @@
-    <style>
-        .svg-container {
-            font-size: 1.6em;
-            font-family: MONOSPACE;
-            text-align: center;
-           /* transform: scale(0.5); */
-        }
-        svg {
-            font-weight: bold;
-        }    
-        .xtime {
-            font-size: 0.75em;
-            font-weight: normal;
-        }
-        </style>
-<h2 class="chartname">Температура за сутки</h2>
+
+<h2 class="chartname">Температура %DHTNAME% за сутки</h2>
     <svg width="1000" height="400">
 
 <!--сеточка горизонталка-->
