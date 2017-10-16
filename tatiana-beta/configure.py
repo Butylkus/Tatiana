@@ -13,6 +13,10 @@ import os, sys, getpass
 from datetime import datetime
 import pymysql as MYSQL #используем более короткий синоним, ибо нех
 
+
+global stop #флаг остановки, нужен для выхода из конфигуратора
+stop = False
+
 #создание базы
 def dbcreate(dbuser, dbpass):
     print("Создаю базу данных tatiana...")
@@ -63,14 +67,13 @@ def mainmenu(cursor):
     2. Пины (имена и разводка, что куда подключено)
     3. Одинокие кнопки
     4. Блочные устройства (1 кнопка = 2 выхода)
-    5. Датчики климата
+    5. Датчики климата  
     6. Охранная система
     0. Выход
 Введите номер и нажмите [ВВОД]""")
-    task = str(input("# :> "))
-    print (task)
+    task = str(input("# > "))
     if (task == "1"):
-        print ("Юзерс")
+        userlist(cursor) #вызываем список пользователей и операции
     if (task == "2"):
         print ("Глагне таблицо")
     if (task == "3"):
@@ -82,14 +85,63 @@ def mainmenu(cursor):
     if (task == "6"):
         print ("Алярмы")
     if (task == "0"):
+        stop=True
         os.system("clear")
         sys.exit("Ну покедова! Заглядывай ещё =)")
+        return
+
+
+
+
+#управляем пользователями
+def userlist(cursor):
+    print("""======== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ========
+Этот раздел позволяет управлять пользователями.
+Вот список всех, кто имеет доступ в систему. Если вы видите что-то, что не предусматривалось ранее... ВРЕМЯ БИТЬ ТРЕВОГУ!""")
+    task = "spam" #объявим переменную для условного выхода
+    while (task != "0"):
+        os.system('clear')
+        query = "SELECT * FROM users;"
+        cursor.execute(query)
+        all_users = cursor.fetchall()
+        len1=1 #ширина поля ID
+        len2=3 #ширина поля login
+        len3=3 #ширина поля username
+        #Определяем максимальные значения для красивой таблицы
+        for user in all_users:
+            if (len1 < len(str(user[0]))):
+                len1 = len(str(user[0]))
+            if (len2 < len(user[1])):
+                len2 = len(user[1])
+            if (len3 < len(user[3])):
+                len3 = len(user[3])
+        #Рисуем таблицу
+        print("ID, логины и имена пользователей")
+        border="+-"+"-"*len1+"-+-"+"-"*len2+"-+-"+"-"*len3+"-+"
+        print(border)
+        for user in all_users:
+            out = "| "+ str(user[0])+" "*(len1-len(str(user[0])))+" | "+user[1]+" "*(len2-len(user[1]))+" | "+user[3]+" "*(len3-len(user[3]))+" |"
+            print(out)
+        print(border)
+        print("Введите ID (столбец 1) пользователя для редактирования или 0 для возврата\nА если ввести ADD, то можно добавить нового")
+        task=input("# > ")
+        os.system('clear')
+        query = "SELECT * FROM users WHERE user_id="+task+";"
+        cursor.execute(query)
+        user = cursor.fetchone()
+        print("Пользователь #{0} под логином {1} и именем {2}\nЧто делать с ним?".format(user[0],user[1],user[3]))
+        print("""Вот что можно сделать:
+    1. Изменить логин (для входа)
+    2. Изменить имя (отображается в веб-интерфейсе)
+    3. Изменить пароль (для веб-интерфейса)
+    4. УДАЛИТЬ
+    0. Вернуться""")
+        task=input("# > ")
 
 
 
 
 #Возврат таблицы pins
-
 
 
 
@@ -115,15 +167,13 @@ except ImportError:
     Приведите файл в порядок и перезапустите этот скрипт.
 ========""")
     exit(0)
-time.sleep(3)
 
 #Добавим пафоса...
 os.system("clear")
 print (
 """========
 Приступаем к конфигурированию Татьяны!
-========""")
-time.sleep(3)
+========""")    
 os.system("clear")
 
 
@@ -149,6 +199,7 @@ try:
     db = MYSQL.connect(host="localhost", database="tatiana", user=dbuser, password=dbpass, use_unicode=True, charset="utf8")
     cursor = db.cursor()
     db.close()
+    print("Успешно!")
 except:
     print("""
 ========
@@ -209,15 +260,27 @@ print("""
 ======== ПРИГОТОВЬТЕСЬ ========
 Начнём через пару секунд!
 """)
-time.sleep(3)
+
 
 
 #цепляемся к базе
 db = MYSQL.connect(host="localhost", database="tatiana", user=dbuser, password=dbpass, use_unicode=True, charset="utf8")
 cursor = db.cursor()
 
-#запускаем главную функцию
-mainmenu(cursor)
+
+############################################
+### запускаем главную функцию
+### выводим меню
+############################################
+
+
+
+while (stop==False):
+    mainmenu(cursor)
+
+
+
+
 
 
 #цепляемся к базе
