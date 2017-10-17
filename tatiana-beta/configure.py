@@ -9,7 +9,7 @@
 # ========= Импортируем модули ========= #
 
 import time
-import os, sys, getpass
+import os, sys, getpass, hashlib, random
 from datetime import datetime
 import pymysql as MYSQL #используем более короткий синоним, ибо нех
 
@@ -73,7 +73,7 @@ def mainmenu(cursor):
 Введите номер и нажмите [ВВОД]""")
     task = str(input("# > "))
     if (task == "1"):
-        userlist(cursor) #вызываем список пользователей и операции
+        userlist() #вызываем список пользователей и операции
     if (task == "2"):
         print ("Глагне таблицо")
     if (task == "3"):
@@ -94,13 +94,15 @@ def mainmenu(cursor):
 
 
 #управляем пользователями
-def userlist(cursor):
-    print("""======== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ========
-Этот раздел позволяет управлять пользователями.
-Вот список всех, кто имеет доступ в систему. Если вы видите что-то, что не предусматривалось ранее... ВРЕМЯ БИТЬ ТРЕВОГУ!""")
+def userlist():
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
     task = "spam" #объявим переменную для условного выхода
     while (task != "0"):
         os.system('clear')
+        print("""======== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ========
+Этот раздел позволяет управлять пользователями.
+Вот список всех, кто имеет доступ в систему. Если вы видите что-то, что не предусматривалось ранее... ВРЕМЯ БИТЬ ТРЕВОГУ!""")
         query = "SELECT * FROM users;"
         cursor.execute(query)
         all_users = cursor.fetchall()
@@ -116,31 +118,128 @@ def userlist(cursor):
             if (len3 < len(user[3])):
                 len3 = len(user[3])
         #Рисуем таблицу
-        print("ID, логины и имена пользователей")
+        print("====\nID, логины и имена пользователей")
         border="+-"+"-"*len1+"-+-"+"-"*len2+"-+-"+"-"*len3+"-+"
         print(border)
         for user in all_users:
             out = "| "+ str(user[0])+" "*(len1-len(str(user[0])))+" | "+user[1]+" "*(len2-len(user[1]))+" | "+user[3]+" "*(len3-len(user[3]))+" |"
             print(out)
         print(border)
-        print("Введите ID (столбец 1) пользователя для редактирования или 0 для возврата\nА если ввести ADD, то можно добавить нового")
+        print("""=====
+Введите:
+    ID (столбец 1) пользователя для редактирования
+    0 для возврата
+    add - добавить нового пользователя""")
         task=input("# > ")
+        if (task == "0"):
+            return
+        if (task == "add"):
+            query = newuser() #вызываем функцию добавляения пользователя
+            cursor.execute(query)
+            db.commit()
+            print("Отлично, одним пользователем больше!")
+            time.sleep(3)
+            continue
         os.system('clear')
         query = "SELECT * FROM users WHERE user_id="+task+";"
         cursor.execute(query)
         user = cursor.fetchone()
-        print("Пользователь #{0} под логином {1} и именем {2}\nЧто делать с ним?".format(user[0],user[1],user[3]))
+        #Запишем явные переменные для простоты манипуляций
+        userid = user[0]
+        login = user[1]
+        username = user[3]
+        password=user[2]
+        print("Пользователь #{0} под логином {1} и именем {2}\nЧто делать с ним?".format(userid,login,username))
         print("""Вот что можно сделать:
-    1. Изменить логин (для входа)
-    2. Изменить имя (отображается в веб-интерфейсе)
-    3. Изменить пароль (для веб-интерфейса)
+    1. Изменить логин
+    2. Изменить имя
+    3. Изменить пароль
     4. УДАЛИТЬ
     0. Вернуться""")
-        task=input("# > ")
+        task_edit=input("# > ")
+        if (task_edit == "0"):
+            db.commit()
+            continue
+        elif (task_edit == "1"):
+            print("Изменение логина. Это то, что необходимо вводить при входе в веб-интерфейс вместе с паролем. Например, supervisor")
+            string="Было "+login+", станет: >"
+            newlogin = input(string)
+            query = "UPDATE users SET login='{0}' WHERE login='{1}';".format(newlogin,login)
+            cursor.execute(query)
+            db.commit()
+            print("Готово, новый логин записан!\nПереходим обратно в меню пользователей")
+            time.sleep(3)
+            continue
+        elif (task_edit == "2"):
+            print("Изменение имени. Это то, что показывается в приветствии веб-интерфейса в меню.")
+            string="Было "+username+", станет: >"
+            newusername = input(string)
+            query = "UPDATE users SET username='{0}' WHERE username='{1}';".format(newusername,username)
+            cursor.execute(query)
+            db.commit()
+            print("Готово, пользователь переименован!\nПереходим обратно в меню пользователей")
+            time.sleep(3)
+            continue
+        elif (task_edit == "4"):
+            print("УДАЛЕНИЕ ПОЛЬЗОВАТЕЛЯ #{0} - {1}, известного как {2}".format(userid,login,username))
+            code = str(random.randint(100,999)) #для подтверждения простого согласия мало. Попросим ввести код
+            string="Вы уверены?! Введите {0}, если уверены: >".format(code)
+            confirm = input(string)
+            if (confirm == code):
+                query = "DELETE FROM users WHERE user_id={0};".format(userid)
+                cursor.execute(query)
+                db.commit()
+                print("Готово, пользователь #{0} - {1}, известнй ранее как {2}, больше не имеет доступа в систему!\nПереходим обратно в меню пользователей".format(userid,login,username))
+            else:
+                print("Уффф, пользователь #{0} - {1}, известнй как {2}, не пострадал...\nПереходим обратно в меню пользователей".format(userid,login,username))
+            time.sleep(3)
+            continue
+        elif (task_edit == "3"):
+            print("""Изменение пароля для веб-интерфейса.
+    Проявите фантазию и благоразумие - ЭТО ВАШ ДОМ! Вы же не кладёте ключи под коврик?""")
+            newpass = passcheck()
+            query = "UPDATE users SET password='{0}' WHERE user_id={1};".format(newpass,userid)
+            cursor.execute(query)
+            db.commit()
+    db.close()
 
 
+#Рекурсию вынесем в отдельный цикл. Мучим юзера паролем
+def passcheck():
+    passone = getpass.getpass("Введите пароль (его не будет видно): ")
+    passtwo = getpass.getpass("Повторите (чтобы не ошибиться): ")
+    if (passone != passtwo):
+        print("Пароли не совпадают, повторите ввод!")
+        passcheck
+    if (passone == passtwo):
+        newpass = hashlib.md5(passone.encode()).hexdigest()
+        return newpass
+            
 
 
+def newuser():
+    os.system('clear')
+    print("""======== ДОБАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ ========
+Чтобы добавить нового пользователя, нам понадобится ввести:
+ЛОГИН - для входа в веб-интерфейс
+ПАРОЛЬ - для логина
+ИМЯ - для приветствия в веб-интерфейсе.
+Итак, приступим!""")
+    newlogin = input("login: ")
+    newpass = passcheck()
+    newname = input("Имя: ")
+    print ("Данные получены, заносим в базу...")
+    string = "INSERT INTO users SET login='{0}', password='{1}', username='{2}', last_login='01.01.1970 00:00:00';".format(newlogin,newpass,newname)
+    return string
+    
+    
+    
+    
+    
+    
+    
+    
+    
 #Возврат таблицы pins
 
 
