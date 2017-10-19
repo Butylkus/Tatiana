@@ -74,17 +74,17 @@ def mainmenu(cursor):
     task = str(input("# > "))
     if (task == "1"):
         userlist() #вызываем список пользователей и операции
-    if (task == "2"):
-        print ("Глагне таблицо")
-    if (task == "3"):
+    elif (task == "2"):
+        mainpins() #настраиваем пины
+    elif (task == "3"):
         print ("Кнопулюшечки")
-    if (task == "4"):
+    elif (task == "4"):
         print ("Люстрорули")
-    if (task == "5"):
+    elif (task == "5"):
         print ("ДыХоТа")
-    if (task == "6"):
+    elif (task == "6"):
         print ("Алярмы")
-    if (task == "0"):
+    else:
         stop=True
         os.system("clear")
         sys.exit("Ну покедова! Заглядывай ещё =)")
@@ -233,14 +233,110 @@ def newuser():
     return string
     
     
+def mainpins():
+    os.system('clear')
+    print("""======== ЦОКОЛЁВКА, РАСПИНОВКА, ИМЕНА УСТРОЙСТВ ========
+Это Самая Главная Таблица!
+Она отвечает за имена устройств, управляет типами подключений и вообще является важнейшей частью Татьяны.
+Вы должны понимать, как, что, куда и зачем вы подключили и корректно передать эти сведения Татьяне.
+Не волнуйтесь, здесь нет ничего страшного, просто не забывайте перезапускать Татьяну после настройки.""")
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    query = "SELECT * FROM pins;"
+    cursor.execute(query)
+    pins = cursor.fetchall()
+    db.close()
+    len1=2 #ширина поля pin
+    len2=20 #ширина поля name
+    len3=8 #ширина поля direction
+    #Определяем максимальные значения для красивой таблицы
+    for pin in pins:
+        if (len2 < len(pin[1])):
+            len2 = len(pin[1])
+        if (len3 < len(pin_director(pin[2]))):
+            len3 = len(pin_director(pin[2]))
+    #Рисуем таблицу
+    print("====\nПины, их названия и назначения")
+    border="+-"+"-"*len1+"-+-"+"-"*len2+"-+-"+"-"*len3+"-+"
+    print(border)
+    for pin in pins:
+        out = "| "+ str(pin[0])+" "*(len1-len(str(pin[0])))+" | "+pin[1]+" "*(len2-len(pin[1]))+" | "+pin_director(pin[2])+" "*(len3-len(pin_director(pin[2])))+" |"
+        print(out)
+    print(border)
+    print ("""Введите:
+    число от 1 до 27 и вы настроите выбранный пин;
+    127 - настройка ВСЕХ пинов по порядку (при первоначальной установке очень полезно);
+    0 - для возврата в меню.""")
+    current = "spam" #Текущий выбор
+    current = int(input("#: > "))
+    if (current in range(1,28)):
+        pin_namer(current) #Вызываем один раз для выбранного пина
+        mainpins() #И самовызов для красоты
+    if (current > 27):
+        for pin in range(1,28):
+            pin_namer(pin) #Фигачим циклом по всем подряд
+        mainpins() #И опять самовызов
+    if (current == 0):
+        return
+
+
+def pin_namer(pin):
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    query = "SELECT name, direction FROM pins WHERE pin={0};".format(pin)
+    cursor.execute(query)
+    selectedpin = cursor.fetchone()
+    print("Пин " + str(pin) + " '" + selectedpin[0] + "': " + pin_director(selectedpin[1]))
+    query = pin_renamer(pin)
+    cursor.execute(query)
+    db.commit()
+    db.close()
+
+def pin_renamer(pin):
+    print("1 - кнопка, 2 - реле, 3 - кнопка на два реле, 4 - DHT-датчик, 5 - PIR-датчик, 6 - не используется")
+    newdirection = pin_redirector(input("это? > ")) #Спрашиваем новое направление
+    newname = input("имя? > ") #спрашиваем новое имя
+    string = "UPDATE pins SET direction='{0}', name='{1}' WHERE pin={2};".format(newdirection,newname,pin)
+    return string
+
+
+#Преобразуем направление из татьяниного формата в человеческий
+def pin_director(direction):
+    if (direction == "none"):
+        return("свободен")
+    if (direction == "dht"):
+        return("датчик DHT11/22")
+    if (direction == "pir"):
+        return("датчик pir")
+    if (direction == "input"):
+        return("кнопка на один выход")
+    if (direction == "block"):
+        return("кнопка на два выхода")
+    if (direction == "output"):
+        return("выходное реле")
+
+#Преобразуем направление из человеческого формата в татьянин
+def pin_redirector(direction):
+    if (direction == "6"):
+        return("none")
+    if (direction == "4"):
+        return("dht")
+    if (direction == "5"):
+        return("pir")
+    if (direction == "1"):
+        return("input")
+    if (direction == "3"):
+        return("block")
+    if (direction == "2"):
+        return("output")
+    else:
+        return("none")
+
+
     
     
     
-    
-    
-    
-    
-#Возврат таблицы pins
+
 
 
 
