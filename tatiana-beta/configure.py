@@ -65,8 +65,8 @@ def mainmenu(cursor):
 Разделы управления:
     1. Пользователи (для веб-интерфейса)
     2. Пины (имена и разводка, что куда подключено)
-    3. Одинокие кнопки
-    4. Блочные устройства (1 кнопка = 2 выхода)
+    3. Одноканальные кнопки (1 кнопка = 1 выход)
+    4. Двухканальные кнопки (1 кнопка = 2 выхода)
     5. Датчики климата  
     6. Охранная система
     0. Выход
@@ -77,7 +77,7 @@ def mainmenu(cursor):
     elif (task == "2"):
         mainpins() #настраиваем пины
     elif (task == "3"):
-        print ("Кнопулюшечки")
+        buttons()
     elif (task == "4"):
         print ("Люстрорули")
     elif (task == "5"):
@@ -279,7 +279,7 @@ def mainpins():
     if (current == 0):
         return
 
-
+#Возвращает строку с номером пина и его именем
 def pin_namer(pin):
     db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
     cursor = db.cursor()
@@ -292,6 +292,7 @@ def pin_namer(pin):
     db.commit()
     db.close()
 
+#Переназывает пин
 def pin_renamer(pin):
     print("1 - кнопка, 2 - реле, 3 - кнопка на два реле, 4 - DHT-датчик, 5 - PIR-датчик, 6 - не используется")
     newdirection = pin_redirector(input("это? > ")) #Спрашиваем новое направление
@@ -333,15 +334,153 @@ def pin_redirector(direction):
         return("none")
 
 
+#Возвращает имя пина
+def pinname(pin):
+    if (pin == ""):
+        return ("НЕТ ВХОДА")
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    query = "SELECT name FROM pins WHERE pin='{0}';".format(pin)
+    cursor.execute(query)
+    name = cursor.fetchone()
+    realname = name[0]
+    db.close()
+    if (realname == ""):
+        return "<NONAME>"
+    else:
+        return realname
+
+#Проверка связанности кнопок
+def button_linked(pin):
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    query = "SELECT * FROM button_device WHERE inpin='{0}';".format(pin)
+    cursor.execute(query)
+    linked = cursor.fetchone()
+    #Если есть выходные пины, покажем их
+    if (linked):
+        return (linked[1], pinname(linked[1]))
+    else:
+        #Приверим на блочность
+        query = "SELECT * FROM button_block WHERE inpin='{0}';".format(pin)
+        cursor.execute(query)
+        linked_in_block = cursor.fetchall()
+        #Если есть в блочных, просто скажем об этом
+        if (linked_in_block):
+            return (0, "** двухканальная")
+        #А если кнопка ещё нигде не привязана, то это главный кандадат на настройку
+        return (0, "* нет привязки")
+    db.close()
+
+#управляем одиночными кнопками
+def buttons():
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    task = "spam" #объявим переменную для условного выхода
+    while (task != "0"):
+        os.system("clear")
+        print("""======== ОДИНОЧНЫЕ КНОПКИ ========
+Это таблица с привязками "кнопка - реле", когда одна кнопка управляет ОДНИМ выходным реле.
+Иными словами, одна кнопка = одна лампочка. Двухканальные кнопки настраиваются в разделе "Двухканальные кнопки".
+Структура таблицы:
++ Пин кнопки + Имя кнопки + Пин реле + Имя реле +""")
+   
+        query = "SELECT pin FROM pins WHERE direction='input';"
+        cursor.execute(query)
+        inpins = cursor.fetchall()
+        #print (inpins[0])
+        len1=2 #ширина поля pin
+        len2=10 #ширина поля имени кнопки
+        len3=10 #ширина поля direction
+        
+        #Определяем максимальные значения для красивой таблицы
+        for pin in inpins:
+            if (len2 < len(pinname(pin[0]))):
+                len2 = len(pinname(pin[0]))
+            outpin = button_linked(pin[0])
+            if (len3 < len(outpin[1])):
+                len3 = len(outpin[1])
+
+        #Рисуем таблицу с данными
+        border="+-"+"-"*len1+"-+-"+"-"*len2+"-+-"+"-"*len1+"-+-"+"-"*len3+"-+"
+        print(border)
+        #Заодно свернём многомерный список в аккуратную линеечку
+        pinarray = []
+        for pin in inpins:
+            pinarray.append(pin[0]) #вынимаем и складываем
+            outpin = button_linked(pin[0])
+            out = "| "+ str(pin[0])+" "*(len1-len(str(pin[0])))+" | "+pinname(pin[0])+" "*(len2-len(pinname(pin[0])))+" | "+str(outpin[0])+" "*(len1-len(str(outpin[0])))+" | "+outpin[1]+" "*(len3-len(outpin[1]))+" |"
+            print(out)
+        print(border)
+        
+        
+        query = ""
+        print("""* - свободно для привязки. ** - перейдите к управлению двухканальными реле.
+    Для привязки/перепривязки кнопки введите её пин (только цифры)
+    0 - для выхода.""")
+        newin = input("# >")
+        #Проверим ввод
+        try:
+            #Если введён 0 - выходим из раздела
+            if (newin == "0"):
+                task = "0"
+                db.close()
+                continue
+            #Если ввдён пин не направления input
+            if (int(newin) not in pinarray):
+                print ("Нет такой кнопки! Попробуйте ещё раз, будьте внимательны!")
+                time.sleep(3)
+                continue
+        except:
+            print ("Что-то не то... Ну-ка ещё разик...")
+            time.sleep(3)
+            continue
+        #print (newin)
+        
+        print("К чему привязываем? Введите выходной пин (реле) или DEL - для освобождения кнопки")
+        newout = input("# >")
+        print (newout)
+        try:
+            if ((newout == "del") or (newout == "DEL")):
+                print("Удаляётся привязка кнопки на пине {0} ({1})...".format(newin, pinname(newin)))
+                query = "DELETE FROM button_device WHERE inpin={0};".format(int(newin))
+                cursor.execute(query)
+                db.commit()
+                time.sleep(3)
+                continue
+            if (int(newout) not in range(1,28)):
+                os.system('clear')
+                print ("Нет такого пина! Попробуйте ещё раз, будьте внимательны!")
+                time.sleep(3)
+                continue
+        except:
+
+            os.system('clear')
+            print ("Некорректный ввод, придётся повторить...")
+            time.sleep(3)
+            continue
+        #print (newout)
+
+        
+        #Формируем строку запроса в БД для создание и обновления привязки
+        query = "INSERT INTO button_device (inpin, outpin) VALUES({0},'{1}') ON DUPLICATE KEY UPDATE outpin='{1}';".format(int(newin), newout)
+        #И записываем её
+        cursor.execute(query)
+        db.commit()
+        print("Готово, мы привязали пин {0} ({1}) к пину {2} ({3})".format(newin, pinname(newin), newout, pinname(newout)))
+        time.sleep(3)    
     
     
-    
 
 
 
 
 
 
+
+############################################
+### ОСНОВНАЯ ЛОГИКА
+############################################
 
 
 # ========= Проверка существования конфига и БД ========= #
@@ -357,7 +496,8 @@ except ImportError:
     """ЕГГОГ! Что-то пошло не так =(
     Убедитесь, что:
         - файл config.py существует;
-        - находится в этом же каталоге.
+        - находится в этом же каталоге;
+        - содержит необходимые данные.
     Если что, вот образец: https://github.com/Butylkus/Tatiana/blob/develop/tatiana-beta/config.py
     Приведите файл в порядок и перезапустите этот скрипт.
 ========""")
@@ -372,6 +512,11 @@ print (
 os.system("clear")
 
 
+
+############################################
+### Проверка наличия базы
+############################################
+
 print("""
 ======== КОНФИГУРИРУЕМ ТАТЬЯНУ ========
 Введите данные для доступа к БД:
@@ -379,10 +524,6 @@ print("""
 dbuser=str(input("Логин (обычно root): "))
 dbpass=getpass.getpass("Пароль: ")
 
-
-############################################
-### Проверка наличия базы
-############################################
 
 print("""
 ======== ПРОВЕРЯЕМ НАЛИЧИЕ БАЗЫ ДАННЫХ ========
@@ -473,18 +614,8 @@ cursor = db.cursor()
 while (stop==False):
     mainmenu(cursor)
 
-
-
-
-
-
-#цепляемся к базе
-#цепляемся к базе
-#цепляемся к базе
-#цепляемся к базе
-#цепляемся к базе
-
-
+db.close()
+sys.exit("Ну что же, видимо, конфигурация завершена... Возвращайтесь в любое время =)")
 
 
 
@@ -495,6 +626,7 @@ while (stop==False):
 #db = MYSQL.connect(host="localhost", database="tatiana", user=dbuser, password=dbpass, use_unicode=True, charset="utf8")
 # подключение как в конфиге:
 #db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+#query = "INSERT INTO button_device (inpin, outpin) VALUES({0},'{1}') ON DUPLICATE KEY UPDATE outpin='{1}';".format(int(newin), newout)
 #cursor = db.cursor()
 #query = "SELECT pin FROM `pins` WHERE `direction`='output'"
 #query = "UPDATE `pins` SET `status`=1 WHERE `pin`='" + str(pin) + "'"
