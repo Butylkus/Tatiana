@@ -9,7 +9,7 @@
 # ========= Импортируем модули ========= #
 
 import time
-import os, sys, getpass, hashlib, random
+import os, sys, getpass, hashlib, random, re
 from datetime import datetime
 import pymysql as MYSQL #используем более короткий синоним, ибо нех
 
@@ -81,7 +81,7 @@ def mainmenu(cursor):
     elif (task == "4"):
         print ("Люстрорули")
     elif (task == "5"):
-        print ("ДыХоТа")
+        dht()
     elif (task == "6"):
         print ("Алярмы")
     else:
@@ -473,7 +473,128 @@ def buttons():
     
 
 
+#
+def dht_type(cursor, pin):
+    if (pin == None):
+        return ("* ???")
+    query = "SELECT model FROM dht_sensors WHERE pin='{0}';".format(pin)
+    cursor.execute(query)
+    model = cursor.fetchone()
+    if (model == None):
+        return ("* ???")
+    if (str(model[0]) == "11"):
+        return ("DHT11")
+    elif (str(model[0]) == "22"):
+        return ("DHT22")
+    else:
+        return ("* ???")
 
+
+#управляем датчиками DHT
+def dht():
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    task = "spam" #объявим переменную для условного выхода
+    while (task != "0"):
+        os.system("clear")
+        print ("""======== ДАТЧИКИ DHT ========
+Это таблица с датчиками климата DHT11/22. Собственно, кроме модели Татьяне ничего не нужно, она всё сделает сама.
+Интервал опроса датчиков (по умолчанию 30 минут) настраивается в ФАЙЛЕ КОНФИГУРАЦИИ config.py!
+Структура таблицы:
++ Пин датчика + Имя датчика + Модель датчика +""")
+   
+        query = "SELECT pin, name FROM pins WHERE direction='dht';"
+        cursor.execute(query)
+        sensors = cursor.fetchall()
+        len1=2 #ширина поля pin
+        len2=8 #ширина поля name
+        len3=5 #ширина поля direction
+
+        #Определяем максимальные значения для красивой таблицы
+        for sensor in sensors:
+            #print (str(sensor[0]) + " ::: " + sensor[1])
+            if (len2 < len(str(sensor[1]))):
+                len2 = len(str(sensor[1]))
+            if (len3 < len(dht_type(cursor,sensor[0]))):
+                len3 = len(dht_type(cursor,sensor[0]))
+            #print (len1, len2, len3, sep="::")
+            #print (dht_type(cursor,sensor[0]))
+
+ 
+        #Рисуем таблицу
+        border="+-"+"-"*len1+"-+-"+"-"*len2+"-+-"+"-"*len3+"-+"
+        print (border)
+        for sensor in sensors:
+            out = "| "+ str(sensor[0])+" "*(len1-len(str(sensor[0])))+" | "+sensor[1]+" "*(len2-len(str(sensor[1])))+" | "+dht_type(cursor, sensor[0])+" "*(len3-len(dht_type(cursor, sensor[0])))+" |"
+            print(out)
+        print (border)
+        print ("""* ??? - тип датчика не задан и нуждается в настройке.
+Чтобы изменить тип датчика, введите пин и модель, 11 для DHT11 и 22 для DHT22
+0 - для выхода в главное меню:""")
+
+        #Переформируем многомерку в список пинов для проверки
+        allowedpins = []
+        for sensor in sensors:
+            allowedpins.append(sensor[0])
+        #print (allowedpins)
+        
+        #Запрашиваем ввод пина
+        task = input("ПИН > ")
+
+        #Защита от идиотов и возврат
+        if ((task == "0") or (task == "")):
+            print ("Возвращаемся в меню...")
+            db.close()
+            time.sleep(1)
+            break
+        elif (re.search('[a-zA-Zа-яА-Я]', task)):
+            print ("Пожалуйста, вводите ТОЛЬКО ЦИФРЫ!")
+            time.sleep(3)
+        elif (int(task) not in allowedpins):
+            print ("Не пойдёт такое! Повнимательнее, нужен пин из таблицы!")
+            time.sleep(3)
+            
+        elif (int(task) in allowedpins):
+            print ("К пину {0} ({1}) подключен датчик DHT:".format(task,pinname(task)))
+            
+            #Всё в порядке, запрашиваем модель датчика
+            newtype = input("МОДЕЛЬ (11 или 22), DEL - удалить, 0 - отмена: > ")
+            if (newtype not in ("11", "22", "0", "del", "DEL")):
+                print ("Перестаньте баловаться! Татьяна натура тонкая, а ну как сознание потеряет? Навсегда...")
+            elif (newtype == "0"):
+                print ("Хорошо, не трогаем пин {0} ({1})".format(task,pinname(task)))
+                continue
+            elif (newtype in ("del", "DEL")):
+                print ("Отключить пин {0} ({1}) от сбора статистики и перевести в неактивный режим?".format(task, pinname(task)))
+                print ("""Сбор статистики остановится, а пину будет присвоено направление NONE.
+Для включения необходимо будет снова настроить его в меню 2 (Пины) и здесь.
+Собранная ранее статистика не удаляется и будет храниться до особого распоряжения.""")
+                code = str(random.randint(100,999)) #для подтверждения простого согласия мало. Попросим ввести код
+                string = "Вы уверены?! Введите {0}, если уверены: >".format(code)
+                confirm = input(string)
+                if (confirm == code):
+                    query1 = "DELETE FROM dht_sensors WHERE pin={0};".format(task)
+                    query2 = "UPDATE pins SET direction='none' WHERE pin={0};".format(task)
+                    cursor.execute(query1)
+                    print ("Таблица сенсоров обновлена...")
+                    cursor.execute(query2)
+                    print ("Таблица пинов обновлена!")
+                    db.commit()
+                    time.sleep(5)
+                continue
+            else:
+                if (newtype in ("11", "22")):
+                    query = "INSERT INTO dht_sensors (pin, model) VALUES({0},'{1}') ON DUPLICATE KEY UPDATE pin={0}, model='{1}';".format(int(task), newtype)
+                    cursor.execute(query)
+                    print("Готово, мы настроили датчик {0} (DHT{1}) на сбор данных".format(pinname(task), newtype))
+                else:
+                    print ("Так... Либо вы начинаете подходить к делу серьёзно, либо Татьяна обидится и уйдёт!")
+                    db.close()
+                    time.sleep(5)
+                    break
+        
+        db.commit() #чтобы лишний раз не прописывать
+        time.sleep(3)
 
 
 
