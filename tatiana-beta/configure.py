@@ -79,7 +79,7 @@ def mainmenu(cursor):
     elif (task == "3"):
         buttons()
     elif (task == "4"):
-        print ("Люстрорули")
+        buttons_block()
     elif (task == "5"):
         dht()
     elif (task == "6"):
@@ -597,6 +597,162 @@ def dht():
         time.sleep(3)
 
 
+#Возвращает кортеж с кнопками в блочных_устройствах
+def button_linked_block(pin):
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    query = "SELECT * FROM button_block WHERE inpin='{0}';".format(pin)
+    cursor.execute(query)
+    linked = cursor.fetchall()
+    #Если есть выходные пины, покажем их
+    if (linked):
+        result = []
+        for res in linked:
+            result.append(res[1])
+            result.append(pinname(res[1]))
+        return (result)
+    else:
+        #Приверим на одиночность
+        query = "SELECT * FROM button_device WHERE inpin='{0}';".format(pin)
+        cursor.execute(query)
+        linked_in_solo = cursor.fetchall()
+        #Если есть в одиночных, просто скажем об этом
+        if (linked_in_solo):
+            return (0, "** обычная")
+        #А если кнопка ещё нигде не привязана, то это главный кандадат на настройку
+        return (0, "* нет привязки")
+    db.close()
+
+#Управляем блочными кнопками
+def buttons_block():
+    db = MYSQL.connect(host="localhost", database=config.dbbase, user=config.dbuser, password=config.dbpassword, use_unicode=True, charset="utf8")
+    cursor = db.cursor()
+    task = "spam" #объявим переменную для условного выхода
+    while (task != "0"):
+        os.system("clear")
+        print("""======== ДВУХКАНАЛЬНЫЕ КНОПКИ ========
+Это таблица с привязками "одна кнопка - ДВА реле", когда одна кнопка управляет ДВУМЯ выходными реле.
+Идеально для ЛЮСТР, которые обычно имеют два канала (1+2, 2+2, 2+3 и тд лампочки) и два выключателя.
+Переключение будет происходить циклически по схеме "00 > 01 > 10 > 11" по нажатию ОДНОЙ кнопки.
+На веб-панели выходные устройства будут переключаться как РАЗДЕЛЬНЫЕ, то есть работать как обычные кнопки.
+В таблице вы видите ВСЕ кнопки, это чтобы не накосячить =)
+Структура таблицы:
++ Пин кнопки + Имя кнопки + Пин реле + Имя реле +""")
+   
+        query = "SELECT pin FROM pins WHERE direction='block';"
+        cursor.execute(query)
+        inpins = cursor.fetchall()
+        #print (inpins[0])
+        len1=2 #ширина поля pin
+        len2=10 #ширина поля имени кнопки
+        len3=10 #ширина поля первого выхода
+        len4=10 #ширина поля первого выхода 
+        
+        #Определяем максимальные значения для красивой таблицы
+        for pin in inpins:
+            if (len2 < len(pinname(pin[0]))):
+                len2 = len(pinname(pin[0]))
+            outpin = []
+            outpin = button_linked_block(pin[0])
+            #print (outpin)
+            if (len3 < len(outpin[1])):
+                len3 = len(outpin[1])
+            #Перехватываем косяк настройки, когда в таблице button_block нет второго выхода
+            try:
+                if (len3 < len(outpin[3])):
+                    len3 = len(outpin[3])
+                no_other_pin = True
+            except IndexError:
+                no_other_pin = False
+
+        #Рисуем таблицу с данными
+        border="+-"+"-"*len1+"-+-"+"-"*len2+"-+-"+"-"*len1+"-+-"+"-"*len3+"-+"
+        #Заодно свернём многомерный список в аккуратную линеечку
+        pinarray = []
+        out = border + "\n" #Объявим явно пустым, чтобы проще было лепить строку циклом
+        for pin in inpins:
+            pinarray.append(pin[0]) #вынимаем и складываем
+            outpin = button_linked_block(pin[0])
+            out = out + "| "+ str(pin[0])+" "*(len1-len(str(pin[0])))+" | "+pinname(pin[0])+" "*(len2-len(pinname(pin[0])))+" | "+str(outpin[0])+" "*(len1-len(str(outpin[0])))+" | "+outpin[1]+" "*(len3-len(outpin[1]))+" |\n"
+            try: #Аналогично блоку в предыдущем цикле
+                out = out + "| "+ str(pin[0])+" "*(len1-len(str(pin[0])))+" | "+pinname(pin[0])+" "*(len2-len(pinname(pin[0])))+" | "+str(outpin[2])+" "*(len1-len(str(outpin[2])))+" | "+outpin[3]+" "*(len3-len(outpin[3]))+" |\n"
+            except:
+                continue
+        out = out + border
+        print(out)
+
+        
+        
+        query = ""
+        print("""* - свободно для привязки. ** - перейдите к управлению одноканальными реле.
+    Для привязки/перепривязки кнопки введите её пин (только цифры)
+    0 - для выхода.""")
+        newin = input("# >")
+        #Проверим ввод
+        try:
+            #Если введён 0 - выходим из раздела
+            if (newin == "0"):
+                task = "0"
+                db.close()
+                continue
+            #Если ввдён пин не направления input
+            if (int(newin) not in pinarray):
+                print ("Нет такой кнопки! Сначала настройте данный пин как БЛОЧНУЮ кнопку и затем попробуйте ещё раз, будьте внимательны!")
+                time.sleep(3)
+                continue
+        except:
+            print ("Что-то не то... Ну-ка ещё разик...")
+            time.sleep(3)
+            continue
+        #print (newin)
+        
+        print("К чему привязываем? Введите выходные пины по очереди или DEL - для освобождения кнопки")
+        newout1 = input("Первая >")
+        if ((newout1 == "del") or (newout1 == "DEL")):
+            print("Удаление привязок на кнопке {0} ({1})!".format(newin, pinname(newin)))
+            newout2 = input("Вы уверены? Y/N >")
+            if (((newout1 == "del") or (newout1 == "DEL")) and ((newout2 == "y") or (newout2 == "Y") or (newout2 == "Yes") or (newout2 == "yes") or (newout2 == "YES"))):
+                print("Удаляётся привязка кнопки на пине {0} ({1})...".format(newin, pinname(newin)))
+                query = "DELETE FROM button_block WHERE inpin={0};".format(int(newin))
+                cursor.execute(query)
+                db.commit()
+                time.sleep(3)
+                continue
+            else: 
+                print("Ну ладно, давайте начнём с самого начала...")
+                time.sleep(3)
+                continue       
+        newout2 = input("Вторая >")
+        print (newout2)
+        try:
+            if ((int(newout1) not in range(1,28)) or (int(newout2) not in range(1,28))):
+                os.system('clear')
+                print ("Нет такого пина! Попробуйте ещё раз, будьте внимательны!")
+                time.sleep(3)
+                continue
+        except:
+            os.system('clear')
+            print ("Некорректный ввод, придётся повторить...")
+            time.sleep(3)
+            continue
+        #print (newout)
+
+        
+        #Формируем строку запроса в БД для создания и обновления привязки
+        query = "DELETE FROM button_block WHERE inpin={0};".format(int(newin))
+        cursor.execute(query)
+        print("Сбросили старые привязки...")
+        db.commit()
+        query = "INSERT INTO button_block (inpin, outpin) VALUES({0},'{1}') ON DUPLICATE KEY UPDATE outpin='{1}';".format(int(newin), newout1)
+        cursor.execute(query)
+        print("Привязали пин {0} ({1}) к пину {2} ({3})...".format(newin, pinname(newin), newout1, pinname(newout1)))
+        db.commit()
+        query = "INSERT INTO button_block (inpin, outpin) VALUES({0},'{1}') ON DUPLICATE KEY UPDATE outpin='{1}';".format(int(newin), newout2)
+        cursor.execute(query)
+        print("... и к пину {0} ({1})".format(newout2, pinname(newout2)))
+        db.commit()
+        time.sleep(3)
+        
 
 
 ############################################
