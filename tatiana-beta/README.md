@@ -30,7 +30,9 @@
 
     1. sudo apt-get install mysql-server python3 python3-pip  
     2. sudo pip3 install PyMySQL
-    3. Adafruit_DHT устанавлвайте согласно [документации](https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated), за исключением выбора интерпретатора. Вместо python следует вводить python3, иначе модуль по умолчанию установится только для 2 версии Python
+    3. Adafruit_DHT устанавлвайте согласно документации*
+*[Документация](https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated)
+*за исключением выбора интерпретатора. Вместо python следует вводить python3, иначе модуль по умолчанию установится только для 2-й версии Python
 
 Создайте базу данных с названием tatiana, а также пользователя tatiana и паролем tatiana, предоставив этому пользователю базовый доступ. Разумеется, можно менять по своему усмотрению, не забыв прописать соответствующие значения в скрипте config.py.
 
