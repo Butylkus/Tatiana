@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.4-1a"
+version = "0.7.6-171202"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -251,28 +251,36 @@ def dht_reader():
 def pir_reader(pir_pin, capture = False):
     global stopsignal
     global capture_online
+    #читаем настройки для пина
+    connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
+    cursor = connection.cursor()
+    query = "SELECT * FROM `pir_sensors` where pin={0}".format(pir_pin)
+    cursor.execute(query)
+    settings = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    
     while not stopsignal:
         if (GPIO.event_detected(pir_pin) and (capture_online == False)):
             #тут надо записывать лог
             logquery = "%PIRALARM% Движение {1} > {0}\n".format(str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")), pir_pin)
-            print(logquery)
             f = open(config.logpath, "a")
             f.write(logquery)
             f.close()
             if (capture == True):
-                threading.Thread(target=camera_capture).start()
+                threading.Thread(target=camera_capture, args=[settings[1],settings[2],settings[3],settings[4]]).start()
         time.sleep(0.1)
 
 
 
-### Глаза Татьяны. Включает камеру и записывает заданное количество секунд.
-def camera_capture():
+### Глаза Татьяны. Включает камеру и записывает согласно настройкам из базы.
+def camera_capture(dur,res,dev,recpath):
     global capture_online
     capture_online = True #Пошла запись
     nowtime = str(round(time.time()))
-#### 29.07.2017 - даёшь глаза!
-    filename = config.recordpath + str(datetime.strftime(datetime.now(), "%Y%m%d-%H.%M.%S")) + ".mkv" #имя файла для записи с полным путём из конфига
-    os.system("ffmpeg -threads auto -an -t 00:00:30 -video_size 1280x720 -i /dev/video0 -c:v libx264 -preset:v superfast {0}".format(filename)) #погнали записывать
+    filename = recpath + str(datetime.strftime(datetime.now(), "%Y%m%d-%H.%M.%S")) #имя файла для записи с полным путём из конфига
+    os.system("ffmpeg -threads auto -an -t {0} -video_size {1} -i {2} -c:v libx264 -preset:v superfast {3}.mkv".format(dur,res,dev,filename)) #погнали записывать
+    #os.system("avconv -y -t {0} -s {1} -f video4linux2 -i {2} -vcodec mpeg4 -qscale 6 video5.{3}.mp4".format(dur,res,dev,filename)) #погнали записывать
     connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
     cursor = connection.cursor()
     query = "INSERT INTO `pir_data`(`message`,`timestamp`) VALUES ('{0}','{1}')".format(filename, nowtime)
