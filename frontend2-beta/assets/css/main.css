@@ -220,7 +220,7 @@
 	}
 
 	.row > * {
-		float: left;
+		float: inherit;
 		-moz-box-sizing: border-box;
 		-webkit-box-sizing: border-box;
 		box-sizing: border-box;
@@ -1332,7 +1332,7 @@
 
 		.row > * {
 			padding: 40px 0 0 40px;
-            float: right;
+            float: inherit;
 		}
 
 		.row {
@@ -2468,7 +2468,7 @@
 
 /* Mobile */
 
-	@media screen and (max-width: 719px) {
+	@media screen and (max-width: 730px) {
 
 		/* Basic */
 
@@ -2537,7 +2537,7 @@
 .action {
      font-size: 1em;
      margin:5px 5px 5px 5px;
-     width: 30%;
+     /*width: 30%;*/
      /*padding: 0.75em 0.3em 0.75em 0.3em;*/
 }
 

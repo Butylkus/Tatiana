@@ -189,7 +189,7 @@ def userlist():
                 query = "DELETE FROM users WHERE user_id={0};".format(userid)
                 cursor.execute(query)
                 db.commit()
-                print("Готово, пользователь #{0} - {1}, известнй ранее как {2}, больше не имеет доступа в систему!\nПереходим обратно в меню пользователей".format(userid,login,username))
+                print("Готово, пользователь #{0} - {1}, известный ранее как {2}, больше не имеет доступа в систему!\nПереходим обратно в меню пользователей".format(userid,login,username))
             else:
                 print("Уффф, пользователь #{0} - {1}, известнй как {2}, не пострадал...\nПереходим обратно в меню пользователей".format(userid,login,username))
             time.sleep(3)

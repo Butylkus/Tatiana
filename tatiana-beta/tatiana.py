@@ -279,8 +279,8 @@ def camera_capture(dur,res,dev,recpath):
     capture_online = True #Пошла запись
     nowtime = str(round(time.time()))
     filename = recpath + str(datetime.strftime(datetime.now(), "%Y%m%d-%H.%M.%S")) #имя файла для записи с полным путём из конфига
-    os.system("ffmpeg -threads auto -an -t {0} -video_size {1} -i {2} -c:v libx264 -preset:v superfast {3}.mkv".format(dur,res,dev,filename)) #погнали записывать
-    #os.system("avconv -y -t {0} -s {1} -f video4linux2 -i {2} -vcodec mpeg4 -qscale 6 video5.{3}.mp4".format(dur,res,dev,filename)) #погнали записывать
+    #os.system("ffmpeg -threads auto -an -t {0} -video_size {1} -i {2} -c:v libx264 -preset:v superfast {3}.mkv".format(dur,res,dev,filename)) #погнали записывать
+    os.system("avconv -y -t {0} -s {1} -f video4linux2 -i {2} -vcodec mpeg4 -qscale 6 video5.{3}.mp4".format(dur,res,dev,filename)) #погнали записывать
     connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
     cursor = connection.cursor()
     query = "INSERT INTO `pir_data`(`message`,`timestamp`) VALUES ('{0}','{1}')".format(filename, nowtime)
