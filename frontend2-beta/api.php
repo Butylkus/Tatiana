@@ -28,9 +28,9 @@ $res = array(
 "dev" => array()
 );
 
-  $data = mysql_query("SELECT * FROM `pins` WHERE `direction` = 'output' ORDER BY `pin` ASC");
+  $data = mysqli_query("SELECT * FROM `pins` WHERE `direction` = 'output' ORDER BY `pin` ASC");
   
-	while($row = mysql_fetch_assoc($data))
+	while($row = mysqli_fetch_assoc($data))
 	{  
 		//Если в статусе содержится число 0 генерируем красную кнопку в противном случаи зелёную
 		

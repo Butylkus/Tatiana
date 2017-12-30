@@ -17,7 +17,7 @@ import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
 import config
 
-version = "0.7.6-171202"
+version = "0.7.6-171230"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -230,11 +230,11 @@ def dht_reader():
         while i<3:
             humidity, temperature = dht.read_retry(sensor[1], sensor[0])
             if (humidity is not None) and (temperature is not None):
-                nowtime = str(round(time.time()))
                 temperature = str(temperature)
                 humidity = str(humidity)
             i+=1
         #но сохраняем только последнее
+        nowtime = str(round(time.time()))
         query = "INSERT INTO `dht_data`(`pin`, `temperature`, `humidity`, `timestamp`) VALUES ({0},{1},{2},{3})".format(sensor[0], temperature, humidity, nowtime)
         cursor.execute(query)
         connection.commit()

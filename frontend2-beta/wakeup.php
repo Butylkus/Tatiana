@@ -1,6 +1,6 @@
 <?php
 //Чтобы этот скрипт работал, необходимо в /etc/sudoers добавить строку:
-//www-data  ALL=(root) NOPASSWD: /bin/systemctl start tatiana.service
+//www-data  ALL=(root) NOPASSWD: /bin/systemctl restart tatiana.service
 
 
 function restart_tatiana(){
@@ -9,7 +9,7 @@ function restart_tatiana(){
     if (stristr($messages[2],"Active: active (running)")){
         $status = "<strong>Татьяна:</strong><br>-Не отвлекай меня от работы, пожалуйста. Кыш, кыш! =)";
     }else{
-        exec('sudo systemctl start tatiana.service');
+        exec('sudo systemctl restart tatiana.service');
         $messages="";
         exec('systemctl status tatiana.service',$messages);
         if (stristr($messages[2],"Active: active (running)")){
