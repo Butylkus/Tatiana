@@ -15,9 +15,10 @@ from datetime import datetime
 import pymysql as MYSQL #используем более короткий синоним, ибо нех
 import RPi.GPIO as GPIO
 import Adafruit_DHT as dht #модуль чтения датчиков DHT: https://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/software-install-updated
+import lirc
 import config
 
-version = "0.7.6-171230"
+version = "0.7.7-180106"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -292,6 +293,81 @@ def camera_capture(dur,res,dev,recpath):
 
 
 
+
+
+
+### Обработчик ик-пультов управления. Позволяет заменить кучу кнопок на куче пинов кучей кнопок на одном пульте
+def ir_init():
+    
+    global stopsignal
+    
+    #Включаемся в лирк
+    socket = lirc.init("num", config.lirc_config)
+    
+    #Коннектимся в базу
+    connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
+    cursor = connection.cursor()
+
+    #Ждём сигналов с пультов
+    while not stopsignal:
+        #Переменная, хранящая значение нажатой кнопки
+        key=""
+        #Читаем кнопки
+        reader = lirc.nextcode()
+        
+        #Если кнопки нажаты, то разбираем ввод
+        #Если кнопка однозначно есть в конфиг-словаре
+        if ((len(reader) > 0) and (reader[0] in config.ir_keys)):
+            key = reader[0] # Нажатая кнопка
+            ir_react(key, keys=config.ir_keys, cursor=cursor)  # реагируем на неё
+            connection.commit()
+        
+        #Если кнопка - супер, то ждём последовательность три секунды
+        elif (len(reader) > 0) and (reader[0] == config.ir_super):
+            key = reader[0]
+            start = time.time()
+            while (key not in config.ir_keys):
+                reader = lirc.nextcode()
+                if (len(reader) > 0):
+                    key = key + reader[0] #Совокупляем последовательность нажатых кнопок
+                #Если попали в последовательность, то реагируем
+                if (key in config.ir_keys):
+                    ir_react(key, keys=config.ir_keys, cursor=cursor)
+                    connection.commit()
+                    break
+                #Отваливаемся по времени ожидания, если ввод так и не попал в словарь
+                if ((time.time()-start) > 3):
+                    break
+    
+    #При стопсигнале отключаемся от лирк и базы
+    lirc.deinit()
+    cursor.close()
+    connection.close()
+    
+# Реакция на кнопки. Получает последовательность кнопок или одну кнопку, сравнивает с ключами и инвертирует статус в базе
+def ir_react(key, keys=config.ir_keys, cursor=cursor):
+    query = "SELECT status FROM `pins` WHERE `pin`='"+keys[key]+"'"
+    cursor.execute(query)
+    status = cursor.fetchone()
+    logquery = "27" + " + " + keys[key] + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n"
+    if status[0] == 1:
+        logquery ="%IROFF% " + logquery #Доформируем строку лога
+        status = 0
+    elif status[0] == 0:
+        logquery ="%IRON% " + logquery #Доформируем строку лога
+        status = 1
+    #Обновляем статус для привязанного выходного пина
+    query = "UPDATE `pins` SET `status`='" + str(status) + "' WHERE `pin`='" + keys[key] + "'"
+    cursor.execute(query)
+    f = open(config.logpath, "a")
+    f.write(logquery)
+    f.close()
+
+
+
+
+
+
 ### Выключатель демона
 def stop(signum, frame, logfile=config.logpath):
     global stopsignal
@@ -300,7 +376,7 @@ def stop(signum, frame, logfile=config.logpath):
     f = open(logfile, "a")
     f.write("%DOWN% > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
     f.close()
-    sys.exit("Демон остановлен. Получен сигнал SIGTERM")
+    sys.exit("Демон остановлен. Получен сигнал")
 
 
 
@@ -323,13 +399,16 @@ signal.signal(signal.SIGTERM, stop)
 for pin in pirpins:
     threading.Thread(target=pir_reader, args=[int(pin[0]), False]).start()
 
+# Запуск потока обработки ИК-пультов
+threading.Thread(target=ir_init).start()
+
 # Подключаемся к БД
 connection = MYSQL.connect(host=config.dbhost, database=config.dbbase, user=config.dbuser, password=config.dbpassword)
 cursor = connection.cursor()
 
 
 # Главный вечный цикл
-while True:
+while not stopsignal:
 # Ловим нажатие кнопок - одиночные
     for pin in inpins:
         #Если кнопка нажата
