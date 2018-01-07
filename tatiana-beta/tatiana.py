@@ -18,7 +18,7 @@ import Adafruit_DHT as dht #модуль чтения датчиков DHT: http
 import lirc
 import config
 
-version = "0.7.7-180106"
+version = "0.7.7-180107"
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM) 
@@ -122,10 +122,10 @@ def check_plan(cursor, logfile=config.logpath):
 #Если настал момент включения/выключения, то пишем в базу соответствующую пару пин-статус, а также делаем запись в логе
             f = open(logfile, "a")
             if ThisMoment == ontime:
-                query = "UPDATE `pins` SET `status`=1 WHERE `pin`='" + str(pin) + "'"
+                query = "UPDATE `pins` SET `status`=0 WHERE `pin`='" + str(pin) + "'"
                 f.write("%PLANON% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
             if ThisMoment == offtime:
-                query = "UPDATE `pins` SET `status`=0 WHERE `pin`='" + str(pin) + "'"
+                query = "UPDATE `pins` SET `status`=1 WHERE `pin`='" + str(pin) + "'"
                 f.write("%PLANOFF% " + str(pin) + " > " + str(datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")) + "\n")
             f.close()
             cursor.execute(query)
